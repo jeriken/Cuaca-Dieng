@@ -101,12 +101,12 @@
                         <DialogPanel
                             class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                             <DialogTitle as="h1" class="text-xl font-medium leading-6 text-gray-900">
-                                Tips Prediksi Embun Es
+                                Tips
                             </DialogTitle>
                             <div class="mt-4">
                                 <p class="text-gray-500">
                                     Embun es di predisi akan muncul besok harinya jika saat pukul 22.00 suhu sudah dibawah
-                                    6° C
+                                    6° C. Angin juga mempengaruhi terjadi tidaknya pembentukan embun es.
                                 </p>
                             </div>
 
@@ -139,29 +139,15 @@ import {
 const isOpenPopup = ref(false)
 const solutions = [
     {
-        name: 'Home',
-        description: 'Measure actions your users take',
+        name: 'Beranda',
         href: '##',
         icon: '/img/compressor.png',
     },
     {
-        name: 'Suhu',
-        description: 'Measure actions your users take',
+        name: 'Tentang',
         href: '##',
         icon: '/img/compressor.png',
-    },
-    {
-        name: 'Kelembapan',
-        description: 'Create your own targeted content',
-        href: '##',
-        icon: '/img/compressor.png'
-    },
-    {
-        name: 'Tekanan Udara',
-        description: 'Keep track of your growth',
-        href: '##',
-        icon: '/img/compressor.png'
-    },
+    }
 ]
 
 function setIsOpenPopup(value) {
