@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.22",
+    "apexcharts": "^3.49.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.2"
+    "vue-router": "^4.3.2",
+    "vue3-apexcharts": "^1.5.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
