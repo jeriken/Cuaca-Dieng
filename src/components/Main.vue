@@ -41,7 +41,7 @@
     </div>
 
     <!-- Main -->
-    <div class="flex justify-center md:mt-28">
+    <div class="flex justify-center md:mt-20 xl:mt-28">
         <img class="w-60" src="/img/summertime.png" />
     </div>
     <div class="flex justify-center">
@@ -51,7 +51,7 @@
     <h2 class="flex justify-center font-serif text-gray-400 text-2xl mt-1">Berawan</h2>
 
     <!-- Footer -->
-    <div class="flex justify-center gap-4 justify-center mt-8 mb-4">
+    <div class="flex justify-center gap-4 mt-8 mb-4">
         <div class="text-center border rounded-xl shadow-xl px-4 py-2">
             <div class="flex justify-center items-center py-1">
                 <img class="w-6 h-6" src="/img/compressor.png" />
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <div class="flex justify-start gap-4 border rounded-xl shadow-xl m-8 p-4">
+    <div class="flex justify-start gap-4 border rounded-xl shadow-xl m-8 p-4" @click="install">
         <div class="flex justify-center items-center">
             <img class="w-11 h-10" src="/icon/alarm.png" />
         </div>
@@ -153,4 +153,33 @@ const solutions = [
 function setIsOpenPopup(value) {
     isOpenPopup.value = value
 }
+</script>
+
+<script>
+export default {
+  name: "App",
+  data() {
+    return {
+      deferredPrompt: null
+    };
+  },
+  created() {
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      this.deferredPrompt = e;
+    });
+window.addEventListener("appinstalled", () => {
+      this.deferredPrompt = null;
+    });
+  },
+  methods: {
+    async dismiss() {
+      this.deferredPrompt = null;
+    },
+    async install() {
+      this.deferredPrompt.prompt();
+    }
+  }
+};
 </script>

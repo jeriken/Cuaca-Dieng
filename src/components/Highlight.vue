@@ -1,11 +1,11 @@
 <template>
-    <div class="grid grid-cols-11 grid-rows-2 lg:grid-flow-col gap-4">
-        <div class="col-span-11 lg:col-span-5 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
+    <div class="grid grid-cols-11 grid-rows-2 lg:grid-flow-row-dense xl:grid-flow-col gap-4">
+        <div class="col-span-11 xl:col-span-5 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
             <div id="chart">
                 <apexchart type="line" height="250" :options="optionRekap" :series="dataRekap"></apexchart>
             </div>
         </div>
-        <div class="col-span-11 lg:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl py-4 px-8 lg:px-4">
+        <div class="col-span-11 lg:col-span-6 xl:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl py-4 px-8 lg:px-4">
             <!-- <h3 class="font-semibold text-center">Suhu</h3> -->
             <div class="grid grid-cols-12 gap-2 h-full items-center">
                 <div class="col-span-12">
@@ -39,11 +39,11 @@
             </div>
             <!-- <p class="mt-2 text-sm">Suhu hari ini mengalami penurunan sebanyak 3° dibandingkan hari lalu</p> -->
         </div>
-        <div class="col-span-11 lg:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl p-4">
+        <div class="col-span-11 lg:col-span-6 xl:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl p-4">
             <!-- <h3 class="font-semibold">Tekanan Udara</h3> -->
             <p class="mt-2 text-sm">Terjadi banyak penurunan suhu minggu ini, munculnya embun es bisa terjadi kapan saja</p>
         </div>
-        <div class="col-span-11 lg:col-span-3 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
+        <div class="col-span-11 lg:col-span-5 xl:col-span-3 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
             <h3 class="font-semibold text-center mb-2">Lokasi</h3>
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.31350226444!2d109.90474991411338!3d-7.205029272731311!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700cfe8a2a15eb%3A0xcfd9233d8b8bbb51!2sCandi%20Arjuna!5e0!3m2!1sid!2sid!4v1597120369515!5m2!1sid!2sid" width="100%" overflow="auto" height="230" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
             <!-- <div id="chart" class="mt-2">
