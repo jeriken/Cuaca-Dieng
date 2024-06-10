@@ -45,7 +45,7 @@
         <img class="w-60" src="/img/summertime.png" />
     </div>
     <div class="flex justify-center">
-        <h1 class="text-gray-800 font-semibold tracking-tighter text-9xl">19</h1>
+        <h1 class="text-gray-800 font-semibold tracking-tighter text-9xl">{{ Math.floor(data.field1) }}</h1>
         <i class="text-gray-800 text-7xl">°</i>
     </div>
     <h2 class="flex justify-center font-serif text-gray-400 text-2xl mt-1">Berawan</h2>
@@ -56,21 +56,21 @@
             <div class="flex justify-center items-center py-1">
                 <img class="w-6 h-6" src="/img/compressor.png" />
             </div>
-            <p class="text-sm font-semibold">798.3 mBar</p>
+            <p class="text-sm font-semibold">{{ data.field3 }} mBar</p>
             <p class="text-xs text-gray-400">Tekanan Udara</p>
         </div>
         <div class="text-center border rounded-xl shadow-xl px-4 py-2">
             <div class="flex justify-center py-1">
                 <img class="w-6 h-6" src="/img/temperature.png" />
             </div>
-            <p class="text-sm font-semibold">13°</p>
+            <p class="text-sm font-semibold">{{ parseInt(data.field1) + 4 }}° C</p>
             <p class="text-xs text-gray-400">Real Feel</p>
         </div>
         <div class="text-center border rounded-xl shadow-xl px-4 py-2">
             <div class="flex justify-center items-center py-1">
                 <img class="w-6 h-6" src="/img/humidity.png" />
             </div>
-            <p class="text-sm font-semibold">95.84%</p>
+            <p class="text-sm font-semibold">{{ data.field2 }}%</p>
             <p class="text-xs text-gray-400">Kelembapan</p>
         </div>
     </div>
@@ -114,7 +114,7 @@
                                 <button type="button"
                                     class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                     @click="setIsOpenPopup(false)">
-                                    Sudah paham
+                                    Paham
                                 </button>
                             </div>
                         </DialogPanel>
@@ -157,29 +157,30 @@ function setIsOpenPopup(value) {
 
 <script>
 export default {
-  name: "App",
-  data() {
-    return {
-      deferredPrompt: null
-    };
-  },
-  created() {
-    window.addEventListener("beforeinstallprompt", e => {
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      this.deferredPrompt = e;
-    });
-window.addEventListener("appinstalled", () => {
-      this.deferredPrompt = null;
-    });
-  },
-  methods: {
-    async dismiss() {
-      this.deferredPrompt = null;
+    name: "App",
+    props: ['data'],
+    data() {
+        return {
+            deferredPrompt: null
+        };
     },
-    async install() {
-      this.deferredPrompt.prompt();
+    created() {
+        window.addEventListener("beforeinstallprompt", e => {
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            this.deferredPrompt = e;
+        });
+        window.addEventListener("appinstalled", () => {
+            this.deferredPrompt = null;
+        });
+    },
+    methods: {
+        async dismiss() {
+            this.deferredPrompt = null;
+        },
+        async install() {
+            this.deferredPrompt.prompt();
+        }
     }
-  }
 };
 </script>
