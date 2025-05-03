@@ -7,7 +7,6 @@
         </div>
         <div
             class="col-span-11 lg:col-span-6 xl:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl py-4 px-8 lg:px-4">
-            <!-- <h3 class="font-semibold text-center">Suhu</h3> -->
             <div class="grid grid-cols-12 gap-2 h-full items-center">
                 <div class="col-span-12">
                     <div class="grid grid-cols-12 gap-4 items-center">
@@ -19,7 +18,7 @@
                             <p class="text-xs text-gray-500">Turun 5° C</p>
                         </div>
                         <div class="col-span-3">
-                            <p class="text-right">{{ Math.floor(Math.max.apply(Math, this.dataRekap[0].data)) }}° C</p>
+                            <p class="text-right">{{ Math.floor(Math.max(...simpanSuhu)) }}° C</p>
                         </div>
                     </div>
                 </div>
@@ -33,15 +32,13 @@
                             <p class="text-xs text-gray-500">Naik 2° C</p>
                         </div>
                         <div class="col-span-3">
-                            <p class="text-right">{{ Math.floor(Math.min.apply(Math, this.dataRekap[0].data)) }}° C</p>
+                            <p class="text-right">{{ Math.floor(Math.min(...simpanSuhu)) }}° C</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- <p class="mt-2 text-sm">Suhu hari ini mengalami penurunan sebanyak 3° dibandingkan hari lalu</p> -->
         </div>
         <div class="col-span-11 lg:col-span-6 xl:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl p-4">
-            <!-- <h3 class="font-semibold">Tekanan Udara</h3> -->
             <p class="mt-2 text-sm">Terjadi banyak penurunan suhu minggu ini, munculnya embun es bisa terjadi kapan saja</p>
         </div>
         <div class="col-span-11 lg:col-span-5 xl:col-span-3 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
@@ -55,103 +52,130 @@
 </template>
 
 <script>
-import VueApexCharts from 'vue3-apexcharts'
+import { ref, watch, onUpdated } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
+import moment from 'moment/min/moment-with-locales';
+moment.locale('id');
 
 export default {
-    el: '#app',
-    props: ['data'],
     components: {
         apexchart: VueApexCharts,
     },
-    data() {
-        return {
-            arrange: false,
-            dataKategori: [],
-            dataRekap: [{
+    props: ['data', 'daily'],
+    setup(props) {
+        const arrange = ref(false);
+        const dataSuhu = ref([]);
+        const formatDaily = ref(false);
+        const simpanSuhu = ref([]);
+        const dataRekap = ref([
+            {
                 name: "Suhu",
-                data: [3, 5, 1, -1, -4, 0, 3, 7]
+                data: [3, 5, 1, -1, -4, 0, 3, 7],
             },
-                // {
-                //     name: "Kelembapan",
-                //     data: [35, 41, 62, 42, 13, 18, 29, 37]
-                // },
-                // {
-                //     name: 'Tekanan Udara',
-                //     data: [87, 57, 74, 99, 75, 38, 62, 47]
-                // }
-            ],
-            optionRekap: {
-                chart: {
-                    height: 250,
-                    type: 'line',
-                    zoom: {
-                        enabled: false
-                    },
+        ]);
+        const optionRekap = ref({
+            chart: {
+                height: 250,
+                type: 'line',
+                zoom: {
+                    enabled: false,
                 },
-                dataLabels: {
-                    enabled: false
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            stroke: {
+                width: [2],
+                curve: 'smooth',
+                dashArray: [0],
+            },
+            title: {
+                text: 'Data 24 jam terakhir',
+                align: 'left',
+            },
+            legend: {
+                tooltipHoverFormatter: function (val, opts) {
+                    return (
+                        val +
+                        ' - <strong>' +
+                        opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] +
+                        '</strong>'
+                    );
                 },
-                stroke: {
-                    width: [2],
-                    // width: [2, 2, 2],
-                    curve: 'smooth',
-                    dashArray: [0],
-                    // dashArray: [0, 0, 0],
+            },
+            markers: {
+                size: 0,
+                hover: {
+                    sizeOffset: 6,
                 },
+            },
+            yaxis: {
                 title: {
-                    text: 'Data 24 jam terakhir',
-                    align: 'left'
+                    text: 'Temperatur',
                 },
-                legend: {
-                    tooltipHoverFormatter: function (val, opts) {
-                        return val + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>'
-                    }
-                },
-                markers: {
-                    size: 0,
-                    hover: {
-                        sizeOffset: 6
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Temperatur'
-                    },
-                },
-                xaxis: {
-                    categories: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'],
-                    tickAmount: 6
-                },
-                grid: {
-                    borderColor: '#f1f1f1',
-                }
             },
-        }
-    },
-    methods: {
-        arrangeData(data) {
-            let dataSuhu = []
-            // let dataKelembapan = []
-            // let dataTekanan = []
-            let dataTanggal = []
-            data.forEach(function (detail) {
-                dataSuhu.push(parseFloat(detail.field1))
-                // dataKelembapan.push(parseInt(detail.field2))
-                // dataTekanan.push(parseInt(detail.field3))
-                dataTanggal.push(detail.created_at)
-            });
-            this.dataRekap[0].data = dataSuhu;
-            // this.dataRekap[1].data = dataKelembapan;
-            // this.dataRekap[2].data = dataTekanan;
-            this.optionRekap.xaxis.categories = dataTanggal;
-            // this.$refs.chart.refresh();
-            this.arrange = true;
-            console.log(dataTanggal)
-        }
-    },
-    updated() {
-        if (this.arrange == false) { this.arrangeData(this.data.feeds) };
-    },
+            xaxis: {
+                type: 'category',
+                tickAmount: 10,
+            },
+            grid: {
+                borderColor: '#f1f1f1',
+            },
+        });
 
+        const arrangeData = (data) => {
+            const dataSuhuTemp = [];
+            const dataSemua = [];
+            data.forEach((detail) => {
+                dataSuhuTemp.push(parseFloat(detail.field1));
+                if (formatDaily.value) {
+                    dataSemua.push({
+                        x: moment(detail.created_at).format('DD MMMM YYYY'),
+                        y: parseFloat(detail.field1),
+                    });
+                } else {
+                    dataSemua.push({
+                        x: moment(detail.created_at).format('HH:mm'),
+                        y: parseFloat(detail.field1),
+                    });
+                }
+            });
+            if (!formatDaily.value) dataSemua.shift();
+            dataRekap.value[0].data = dataSemua;
+            simpanSuhu.value = dataSuhuTemp;
+            arrange.value = true;
+        };
+
+        watch(
+            () => props.data,
+            (data) => {
+                arrange.value = false;
+                dataSuhu.value = data;
+                arrangeData(data.feeds);
+            }
+        );
+
+        watch(
+            () => props.daily,
+            (data) => {
+                formatDaily.value = data;
+            }
+        );
+
+        onUpdated(() => {
+            if (!arrange.value) {
+                arrangeData(props.data.feeds);
+            }
+        });
+
+        return {
+            arrange,
+            dataSuhu,
+            formatDaily,
+            simpanSuhu,
+            dataRekap,
+            optionRekap,
+        };
+    },
 };
 </script>

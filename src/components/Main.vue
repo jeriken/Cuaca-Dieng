@@ -1,3 +1,86 @@
+<script setup>
+import { ref, onMounted, watch } from "vue";
+import {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle,
+    Popover, PopoverButton, PopoverPanel
+} from '@headlessui/vue'
+
+const isOpenPopup = ref(false);
+const kondisi = ref("Cerah");
+const deferredPrompt = ref(null);
+
+const menuData = [
+    {
+        name: 'Beranda',
+        href: '/',
+        target: '_self',
+    },
+    {
+        name: 'Telegram Bot',
+        href: 'https://t.me/CuacaDieng_Bot',
+        target: '_blank',
+    },
+    {
+        name: 'Instagram',
+        href: 'https://www.instagram.com/cuacadieng/',
+        target: '_blank',
+    },
+    {
+        name: 'Twitter',
+        href: 'https://x.com/CuacaDieng',
+        target: '_blank',
+    }
+];
+
+function setIsOpenPopup(value) {
+    isOpenPopup.value = value;
+}
+
+function getKondisi(pressure) {
+    if (pressure >= 798.5) {
+        kondisi.value = "Cerah";
+    } else if (pressure > 796.5) {
+        kondisi.value = "Cerah Berawan";
+    } else if (pressure > 794.0) {
+        kondisi.value = "Berawan";
+    } else {
+        kondisi.value = "Hujan";
+    }
+}
+
+function install() {
+    if (deferredPrompt.value) {
+        deferredPrompt.value.prompt();
+    }
+}
+
+onMounted(() => {
+    window.addEventListener("beforeinstallprompt", e => {
+        e.preventDefault();
+        deferredPrompt.value = e;
+    });
+
+    window.addEventListener("appinstalled", () => {
+        deferredPrompt.value = null;
+    });
+});
+
+watch(() => data.field3, (newValue) => {
+    getKondisi(newValue);
+});
+</script>
+
+<script>
+export default {
+    name: "App",
+    props: ['data']
+};
+</script>
+
 <template>
     <!-- Header -->
     <div class="flex justify-between m-4">
@@ -5,8 +88,8 @@
             <Popover v-slot="{ open }" class="relative">
                 <PopoverButton>
                     <span>
-                        <svg fill="#000000" width="40px" height="40px" viewBox="0 0 24 24" id="menu" data-name="Flat Line"
-                            xmlns="http://www.w3.org/2000/svg" class="icon flat-line">
+                        <svg fill="#000000" width="40px" height="40px" viewBox="0 0 24 24" id="menu"
+                            data-name="Flat Line" xmlns="http://www.w3.org/2000/svg" class="icon flat-line">
                             <path id="primary" d="M3,12H21M9,18H21M3,6H15"
                                 style="fill: none; stroke: rgb(0, 0, 0); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;">
                             </path>
@@ -14,13 +97,14 @@
                     </span>
                 </PopoverButton>
 
-                <transition enter-active-class="transition duration-200 ease-out" enter-from-class="translate-y-1 opacity-0"
-                    enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-150 ease-in"
-                    leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-1 opacity-0">
+                <transition enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="translate-y-1 opacity-0" enter-to-class="translate-y-0 opacity-100"
+                    leave-active-class="transition duration-150 ease-in" leave-from-class="translate-y-0 opacity-100"
+                    leave-to-class="translate-y-1 opacity-0">
                     <PopoverPanel class="absolute left-1/2 z-10 mt-3 w-64 max-w-sm transform px-4 sm:px-0 lg:max-w-3xl">
                         <div class="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                             <div class="relative grid gap-8 bg-white p-4">
-                                <a v-for="item in solutions" :key="item.name" :href="item.href"
+                                <a v-for="item in menuData" :key="item.name" :href="item.href" :target="item.target"
                                     class="-m-3 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus-visible:ring focus-visible:ring-orange-500/50">
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-gray-900">
@@ -48,7 +132,7 @@
         <h1 class="text-gray-800 font-semibold tracking-tighter text-9xl">{{ Math.floor(data.field1) }}</h1>
         <i class="text-gray-800 text-7xl">°</i>
     </div>
-    <h2 class="flex justify-center font-serif text-gray-400 text-2xl mt-1">Berawan</h2>
+    <h2 class="flex justify-center font-serif text-gray-400 text-2xl mt-1">{{ kondisi }}</h2>
 
     <!-- Footer -->
     <div class="flex justify-center gap-4 mt-8 mb-4">
@@ -105,7 +189,8 @@
                             </DialogTitle>
                             <div class="mt-4">
                                 <p class="text-gray-500">
-                                    Embun es di predisi akan muncul besok harinya jika saat pukul 22.00 suhu sudah dibawah
+                                    Embun es di predisi akan muncul besok harinya jika saat pukul 22.00 suhu sudah
+                                    dibawah
                                     6° C. Angin juga mempengaruhi terjadi tidaknya pembentukan embun es.
                                 </p>
                             </div>
@@ -125,62 +210,4 @@
     </TransitionRoot>
 </template>
 
-<script setup>
-import { ref } from "vue";
-import {
-    TransitionRoot,
-    TransitionChild,
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-    Popover, PopoverButton, PopoverPanel
-} from '@headlessui/vue'
 
-const isOpenPopup = ref(false)
-const solutions = [
-    {
-        name: 'Beranda',
-        href: '##',
-        icon: '/img/compressor.png',
-    },
-    {
-        name: 'Tentang',
-        href: '##',
-        icon: '/img/compressor.png',
-    }
-]
-
-function setIsOpenPopup(value) {
-    isOpenPopup.value = value
-}
-</script>
-
-<script>
-export default {
-    name: "App",
-    props: ['data'],
-    data() {
-        return {
-            deferredPrompt: null
-        };
-    },
-    created() {
-        window.addEventListener("beforeinstallprompt", e => {
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            this.deferredPrompt = e;
-        });
-        window.addEventListener("appinstalled", () => {
-            this.deferredPrompt = null;
-        });
-    },
-    methods: {
-        async dismiss() {
-            this.deferredPrompt = null;
-        },
-        async install() {
-            this.deferredPrompt.prompt();
-        }
-    }
-};
-</script>
