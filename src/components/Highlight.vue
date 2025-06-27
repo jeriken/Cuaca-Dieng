@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="col-span-11 lg:col-span-6 xl:col-span-3 row-span-1 bg-stone-50 border rounded-2xl shadow-xl p-4">
-            <p class="mt-2 text-sm">Terjadi banyak penurunan suhu minggu ini, munculnya embun es bisa terjadi kapan saja</p>
+            <p class="mt-2 text-base">Terjadi banyak penurunan suhu minggu ini, munculnya embun es bisa terjadi kapan saja</p>
         </div>
         <div class="col-span-11 lg:col-span-5 xl:col-span-3 row-span-2 bg-stone-50 border rounded-2xl shadow-xl p-4">
             <h3 class="font-semibold text-center mb-2">Lokasi</h3>

@@ -4,15 +4,18 @@ import axios from 'axios'
 import moment from 'moment/min/moment-with-locales'
 import Main from '../components/Main.vue'
 import Highlight from '../components/Highlight.vue'
+import Prediction from '../components/Prediction.vue'
 
 moment.locale('id')
 
 const mainData = ref([])
 const feedData = ref([])
+const predictionData = ref([])
 const dateNow = ref(moment().format('DD MMMM YYYY'))
 const timeNow = ref(moment().format('HH:mm'))
 const isDaily = ref(false)
 const activeMenu = ref("harian")
+const apiKey = "4b1478b77341332e8c75532ba5057c19"
 
 const changeTime = async (days, timescale, daily) => {
     const startDate = moment().subtract(days, 'days').format('YYYY-MM-DD HH:mm:ss')
@@ -40,6 +43,10 @@ const getTimeData = async (startDate, endDate, timescale) => {
     feedData.value = await callApi(`https://api.thingspeak.com/channels/1082329/fields/1.json?timescale=${timescale}&start=${startDate}&end=${endDate}&timezone=Asia/Jakarta`)
 }
 
+const getPredictionData = async () => {
+    predictionData.value = await callApi(`https://api.openweathermap.org/data/2.5/forecast?lat=-7.205047&lon=109.9068867&units=metric&lang=id&appid=${apiKey}`)
+}
+
 const callApi = async (url) => {
     const { data } = await axios.get(url)
     return data
@@ -48,6 +55,7 @@ const callApi = async (url) => {
 onMounted(async () => {
     await getMainData()
     await changeTime(1, 60, false)
+    await getPredictionData()
     setInterval(async () => {
         await getMainData()
         dateNow.value = moment().format('DD MMMM YYYY')
@@ -73,6 +81,8 @@ onMounted(async () => {
                     <h1 class="font-sans font-semibold text-sm text-gray-700 md:text-right">{{ dateNow }}</h1>
                 </div>
             </div>
+            <Prediction :data="predictionData" :daily="isDaily" />
+            <!-- <h2 class="font-sans font-semibold text-2xl my-8">Data Suhu</h2> -->
             <Highlight :data="feedData" :daily="isDaily" />
         </div>
     </div>
