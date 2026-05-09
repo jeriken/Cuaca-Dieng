@@ -73,23 +73,33 @@ const processedData = computed(() => {
     <div class="overflow-x-auto w-full">
         <div class="grid grid-cols-5 gap-4 mb-8 min-w-[1080px]">
             <div v-for="entry in processedData" :key="entry.dt">
-                <div class="bg-stone-50 border rounded-2xl shadow-xl p-4 mb-2">
+                <div class="bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 mb-3 transition-colors duration-300">
                     <div class="flex flex-col items-center">
-                        <h3 class="text-lg font-semibold mb-4">{{ props.daily ? new
+                        <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3 tracking-wider uppercase">{{ props.daily ? new
                             Date(entry.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }) :
                             entry.dt_txt.split(' ')[1].slice(0, 5).replace(':', '.') }}</h3>
-                        <img :src="`/img/weather/${entry.weather[0].icon}.svg`" class="w-28 h-24 mb-1" alt="Weather Icon">
-                        <p class="text-lg capitalize">{{ entry.weather[0].description }}</p>
-                        <!-- <p>{{ entry.main.temp }}°C</p> -->
+                        <img :src="`/img/weather/${entry.weather[0].icon}.svg`" class="w-24 h-20 mb-2" alt="Weather Icon">
+                        <p class="text-sm text-slate-600 dark:text-slate-300 capitalize text-center leading-tight">{{ entry.weather[0].description }}</p>
                     </div>
                 </div>
-                <div class="bg-stone-50 border rounded-2xl shadow-xl p-4">
-                    <div class="flex flex-col items-start">
-                        <p class="text-sm"><span class="font-semibold">Suhu: </span>{{ entry.main.temp }}°C</p>
-                        <p class="text-sm"><span class="font-semibold">Kelembapan: </span> {{ entry.main.humidity }}%</p>
-                        <p class="text-sm"><span class="font-semibold">Kecepatan Angin: </span> {{ entry.wind.speed }} m/s</p>
-                        <p class="text-sm"><span class="font-semibold">Tertutup Awan: </span>{{ entry.clouds.all }}%</p>
-                        <!-- <p><strong>Tekanan: </strong> {{ entry.main.pressure }} hPa</p> -->
+                <div class="bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 dark:text-slate-500">Suhu</span>
+                            <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.main.temp }}°C</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 dark:text-slate-500">Lembap</span>
+                            <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.main.humidity }}%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 dark:text-slate-500">Angin</span>
+                            <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.wind.speed }} m/s</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400 dark:text-slate-500">Awan</span>
+                            <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.clouds.all }}%</span>
+                        </div>
                     </div>
                 </div>
             </div>

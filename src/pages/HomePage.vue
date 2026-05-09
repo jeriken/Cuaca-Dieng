@@ -5,7 +5,6 @@ import moment from 'moment/min/moment-with-locales'
 import Main from '../components/Main.vue'
 import Highlight from '../components/Highlight.vue'
 import Prediction from '../components/Prediction.vue'
-
 moment.locale('id')
 
 const mainData = ref([])
@@ -66,23 +65,22 @@ onMounted(async () => {
 
 <template>
     <div class="grid grid-cols-11">
-        <div class="col-span-11 md:col-span-5 lg:col-span-4 xl:col-span-3 md:h-screen md:sticky top-0 bg-stone-50">
+        <div class="col-span-11 md:col-span-5 lg:col-span-4 xl:col-span-3 md:h-screen md:sticky top-0 bg-slate-50 dark:bg-[#0d1a2e] transition-colors duration-300">
             <Main :data="mainData" />
         </div>
-        <div class="col-span-11 md:col-span-6 lg:col-span-7 xl:col-span-8 bg-stone-100 p-8">
+        <div class="col-span-11 md:col-span-6 lg:col-span-7 xl:col-span-8 bg-slate-100 dark:bg-[#0a1524] p-8 transition-colors duration-300">
             <div class="grid grid-cols-12 mb-8 items-center">
                 <div class="col-span-12 md:col-span-6 flex justify-center md:justify-start gap-6">
-                    <button class="font-sans font-semibold text-lg" @click="changeTime(1, 60, false)" :class="activeMenu === 'harian' ? 'text-blue-500 underline underline-offset-8' : 'text-gray-400'">Harian</button>
-                    <button class="font-sans font-semibold text-lg" @click="changeTime(7, 1440, true)" :class="activeMenu === 'mingguan' ? 'text-blue-500 underline underline-offset-8' : 'text-gray-400'">Mingguan</button>
-                    <button class="font-sans font-semibold text-lg" @click="changeTime(30, 'daily', true)" :class="activeMenu === 'bulanan' ? 'text-blue-500 underline underline-offset-8' : 'text-gray-400'">Bulanan</button>
+                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(1, 60, false)" :class="activeMenu === 'harian' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Harian</button>
+                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(7, 1440, true)" :class="activeMenu === 'mingguan' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Mingguan</button>
+                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(30, 'daily', true)" :class="activeMenu === 'bulanan' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Bulanan</button>
                 </div>
                 <div class="col-span-12 md:col-span-6 hidden md:block">
-                    <h1 class="font-sans font-semibold text-2xl text-gray-900 md:text-right tracking-wide">{{ timeNow }}</h1>
-                    <h1 class="font-sans font-semibold text-sm text-gray-700 md:text-right">{{ dateNow }}</h1>
+                    <h1 class="font-display font-semibold text-2xl text-slate-800 dark:text-slate-100 md:text-right tracking-wide">{{ timeNow }}</h1>
+                    <h1 class="font-semibold text-sm text-slate-500 dark:text-slate-400 md:text-right">{{ dateNow }}</h1>
                 </div>
             </div>
             <Prediction :data="predictionData" :daily="isDaily" />
-            <!-- <h2 class="font-sans font-semibold text-2xl my-8">Data Suhu</h2> -->
             <Highlight :data="feedData" :daily="isDaily" />
         </div>
     </div>
