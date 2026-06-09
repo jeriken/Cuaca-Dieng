@@ -5,6 +5,15 @@ const isDark = ref(
     typeof window !== 'undefined' && localStorage.getItem('cuaca-theme') === 'dark'
 )
 
+// Browser UI (Chrome address bar) color per theme
+const THEME_COLOR = { dark: '#0a1524', light: '#fafaf9' }
+
+function syncThemeColor(value) {
+    if (typeof document === 'undefined') return
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', value ? THEME_COLOR.dark : THEME_COLOR.light)
+}
+
 // Initialize on load
 function syncDarkMode(value) {
     if (typeof window !== 'undefined') {
@@ -13,6 +22,7 @@ function syncDarkMode(value) {
         } else {
             document.documentElement.classList.remove('dark')
         }
+        syncThemeColor(value)
     }
 }
 

@@ -13,6 +13,14 @@ export default {
       },
     },
   },
+  safelist: [
+    // AQI level text colors — bound dynamically via :class in Highlight.vue
+    'text-emerald-500',
+    'text-yellow-500',
+    'text-orange-500',
+    'text-red-500',
+    'text-purple-500',
+  ],
   plugins: [],
 }
 

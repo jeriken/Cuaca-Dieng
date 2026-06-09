@@ -10,11 +10,13 @@ const processedData = computed(() => {
     if (props.data && props.data.list) {
         const currentDate = new Date();
         const currentHour = currentDate.getHours();
-        const today = currentDate.toISOString().split('T')[0];
+        const currentMinute = currentDate.getMinutes();
+        const pad = (n) => String(n).padStart(2, '0');
+        const today = `${currentDate.getFullYear()}-${pad(currentDate.getMonth() + 1)}-${pad(currentDate.getDate())}`;
 
         props.data.list.forEach((item) => {
             const date = item.dt_txt.split(' ')[0]; // Extract the date
-            const entryHour = new Date(item.dt_txt).getHours();
+            const entryHour = parseInt(item.dt_txt.split(' ')[1].slice(0, 2), 10);
 
             if (props.daily) {
                 // Check if the date already exists in the result
@@ -24,8 +26,8 @@ const processedData = computed(() => {
                     // Check if there's an entry for the next hour
                     const nextHourEntry = props.data.list.find((entry) => {
                         const entryDate = entry.dt_txt.split(' ')[0];
-                        const entryHour = new Date(entry.dt_txt).getHours();
-                        return entryDate === date && entryHour > currentHour;
+                        const h = parseInt(entry.dt_txt.split(' ')[1].slice(0, 2), 10);
+                        return entryDate === date && h >= currentHour;
                     });
 
                     if (nextHourEntry) {
@@ -40,7 +42,7 @@ const processedData = computed(() => {
                     }
                 }
             } else {
-                // Add only today's data after the current hour
+                // Add only today's data from the next available slot after the current hour
                 if (date === today && entryHour > currentHour) {
                     result.push({ date, ...item });
                 }
@@ -49,20 +51,15 @@ const processedData = computed(() => {
 
         // If fewer than 5 entries, add data from the next day
         if (result.length < 5) {
-            props.data.list.forEach((item) => {
-                const date = item.dt_txt.split(' ')[0]; // Extract the date
-                const entryHour = new Date(item.dt_txt).getHours();
+            for (const item of props.data.list) {
+                const date = item.dt_txt.split(' ')[0];
 
                 if (!props.daily && date !== today) {
-                    // Add next day's data if today's data is insufficient
                     result.push({ date, ...item });
                 }
 
-                // Stop once we have 5 entries
-                if (result.length === 5) {
-                    return;
-                }
-            });
+                if (result.length === 5) break;
+            }
         }
     }
     return result.slice(0, 5); // Limit to 5 entries
@@ -89,7 +86,7 @@ const processedData = computed(() => {
                             <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.main.temp }}°C</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400 dark:text-slate-500">Lembap</span>
+                            <span class="text-xs text-slate-400 dark:text-slate-500">Kelembapan</span>
                             <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ entry.main.humidity }}%</span>
                         </div>
                         <div class="flex justify-between items-center">
