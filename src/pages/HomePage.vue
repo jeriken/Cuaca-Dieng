@@ -106,7 +106,7 @@ onMounted(async () => {
 
 <template>
     <div class="grid grid-cols-11">
-        <div class="col-span-11 md:col-span-5 lg:col-span-4 xl:col-span-3 h-screen md:sticky top-0 bg-slate-50 dark:bg-[#0d1a2e] transition-colors duration-300">
+        <div class="col-span-11 md:col-span-5 lg:col-span-4 xl:col-span-3 min-h-screen md:h-screen flex flex-col md:sticky top-0 bg-slate-50 dark:bg-[#0d1a2e] transition-colors duration-300">
             <Main :data="mainData" :loading="isLoading" :sunData="sunData" />
         </div>
         <div class="col-span-11 md:col-span-6 lg:col-span-7 xl:col-span-8 bg-slate-100 dark:bg-[#0a1524] p-8 transition-colors duration-300">

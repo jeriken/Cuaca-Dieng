@@ -7,6 +7,11 @@ export default createRouter({
     {
       path: '/',
       component: HomePage,
+    },
+    {
+      path: '/twibbon',
+      // Loaded on demand so the home page bundle stays the same size.
+      component: () => import('./pages/TwibbonPage.vue'),
     }
   ]
 })
