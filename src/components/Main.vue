@@ -8,7 +8,9 @@ import {
     DialogTitle,
     Popover, PopoverButton, PopoverPanel
 } from '@headlessui/vue'
+import { RouterLink } from 'vue-router'
 import { useDarkMode } from '../composables/useDarkMode.js'
+import { getKondisi } from '../utils/kondisi.js'
 import moment from 'moment/min/moment-with-locales'
 moment.locale('id')
 
@@ -26,6 +28,12 @@ const navLinks = [
         href: '/',
         target: '_self',
         iconPath: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10',
+    },
+    {
+        name: 'Twibbon Suhu',
+        to: '/twibbon',
+        iconPath: 'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z M12 17a4 4 0 100-8 4 4 0 000 8z',
+        isNew: true,
     },
     {
         name: 'Telegram Bot',
@@ -62,22 +70,6 @@ function setIsOpenPopup(value) {
     isOpenPopup.value = value;
 }
 
-function getKondisi(pressure, rain) {
-    if (pressure >= 798.5 && rain > 950) {
-        kondisi.value = "Cerah";
-    } else if (pressure > 796.5 && rain > 950) {
-        kondisi.value = "Cerah Berawan";
-    } else if (pressure > 794.0) {
-        kondisi.value = "Berawan";
-    } else if (pressure < 794.0 && rain < 950) {
-        kondisi.value = "Hujan";
-    } else if (pressure < 792.0 && rain < 950) {
-        kondisi.value = "Hujan Lebat";
-    } else {
-        kondisi.value = "Berawan";
-    }
-}
-
 function install() {
     if (deferredPrompt.value) {
         deferredPrompt.value.prompt();
@@ -96,12 +88,12 @@ onMounted(() => {
 });
 
 watch(() => props.data, (value) => {
-    if (value?.field3) getKondisi(value.field3, value.field5);
+    if (value?.field3) kondisi.value = getKondisi(value.field3, value.field5);
 });
 </script>
 
 <template>
-    <div class="relative flex flex-col h-full transition-colors duration-300">
+    <div class="relative flex flex-col flex-1 md:h-full transition-colors duration-300">
 
         <!-- Header -->
         <div class="flex justify-between items-center px-5 pt-5 pb-2">
@@ -125,7 +117,8 @@ watch(() => props.data, (value) => {
                             class="rounded-2xl overflow-hidden shadow-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#162032]">
                             <div class="p-2">
                                 <template v-for="item in navLinks" :key="item.name">
-                                    <a :href="item.href" :target="item.target"
+                                    <component :is="item.to ? RouterLink : 'a'"
+                                        v-bind="item.to ? { to: item.to } : { href: item.href, target: item.target }"
                                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group">
                                         <svg v-if="item.isX" width="14" height="14" viewBox="0 0 24 24"
                                             class="fill-slate-400 dark:fill-slate-500 group-hover:fill-slate-600 dark:group-hover:fill-slate-300 transition-colors flex-shrink-0">
@@ -141,7 +134,11 @@ watch(() => props.data, (value) => {
                                             class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 transition-colors">
                                             {{ item.name }}
                                         </span>
-                                    </a>
+                                        <span v-if="item.isNew"
+                                            class="ml-auto text-[10px] font-bold uppercase tracking-wide bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-md">
+                                            Baru
+                                        </span>
+                                    </component>
                                 </template>
                             </div>
 
@@ -296,6 +293,29 @@ watch(() => props.data, (value) => {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Twibbon CTA -->
+                        <RouterLink to="/twibbon"
+                            class="group flex items-center gap-3 mx-4 mt-3 rounded-2xl px-4 py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/20 hover:shadow-sky-500/40 transition-shadow">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-white/20 flex items-center justify-center">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                            </span>
+                            <span class="flex-1 min-w-0">
+                                <span class="flex items-center gap-1.5 text-sm font-semibold leading-tight">
+                                    Bikin Twibbon Suhu
+                                    <span class="text-[9px] font-bold uppercase tracking-wide bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-md">Baru</span>
+                                </span>
+                                <span class="block text-xs text-sky-100 truncate mt-0.5">Pamerkan suhu Dieng di fotomu</span>
+                            </span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform group-hover:translate-x-0.5">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </RouterLink>
 
                         <!-- Install PWA banner -->
                         <div v-if="deferredPrompt"
