@@ -68,7 +68,14 @@ const processedData = computed(() => {
 
 <template>
     <div class="overflow-x-auto w-full">
-        <div class="grid grid-cols-5 gap-4 mb-8 min-w-[1080px]">
+        <!-- Skeleton — reserves the same height as the real 5-card grid so it never pops in and shifts the sections below -->
+        <div v-if="!processedData.length" class="grid grid-cols-5 gap-4 mb-8 min-w-[1080px]">
+            <div v-for="i in 5" :key="i">
+                <div class="h-[167.5px] mb-3 rounded-2xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>
+                <div class="h-[122px] rounded-2xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>
+            </div>
+        </div>
+        <div v-else class="grid grid-cols-5 gap-4 mb-8 min-w-[1080px]">
             <div v-for="entry in processedData" :key="entry.dt">
                 <div class="bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 mb-3 transition-colors duration-300">
                     <div class="flex flex-col items-center">

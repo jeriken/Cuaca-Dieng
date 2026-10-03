@@ -1,58 +1,56 @@
 import { computed } from 'vue'
-import moment from 'moment/min/moment-with-locales'
+import moment from 'moment'
+import 'moment/locale/id'
 moment.locale('id')
 
 export function useAnalytics(feedData, mainData, predictionData) {
     // Frost (embun es) prediction
-    // Rule: temp at 22:00 < 6°C + wind < 3 m/s → frost likely 04:00-06:00 next morning
+    // Rule: real sensor temp (Field1) near 21:00 WIB < 5°C + calm wind → frost likely 04:00-06:00 next morning
     const embunEsPrediction = computed(() => {
         const feeds = feedData.value?.feeds
         const list = predictionData.value?.list
-        if (!feeds?.length && !list?.length) return null
+        if (!feeds?.length) return null
 
         const now = moment()
-        const currentHour = now.hour()
-        let temp22 = null
-        let forecastWind = null
 
-        if (currentHour >= 22 && feeds?.length) {
-            // After 22:00 — find the actual 22:00 reading from ThingSpeak today
-            const reading22 = [...feeds].reverse().find(f => moment(f.created_at).hour() === 22)
-            if (reading22) temp22 = parseFloat(reading22.field1)
-        }
-
-        if (temp22 === null && list?.length) {
-            // Before 22:00 or no reading found — use OWM forecast closest to 21:00/22:00 tonight
-            const tonight22 = list.find(item => {
-                const t = moment(item.dt_txt)
-                return (t.hour() === 21 || t.hour() === 22) && t.isSame(now, 'day')
-            })
-            if (tonight22) {
-                temp22 = tonight22.main.temp
-                forecastWind = tonight22.wind.speed
+        // Cari pembacaan Field1 (suhu real ThingSpeak) yang paling dekat jam 21.00 hari ini
+        const target21 = moment(now).hour(21).minute(0).second(0)
+        let closest = null
+        let closestDiff = Infinity
+        for (const feed of feeds) {
+            const t = moment(feed.created_at)
+            if (!t.isSame(now, 'day')) continue
+            const temp = parseFloat(feed.field1)
+            if (isNaN(temp)) continue
+            const diff = Math.abs(t.diff(target21))
+            if (diff < closestDiff) {
+                closestDiff = diff
+                closest = temp
             }
         }
+        const MAX_TOLERANCE_MS = 40 * 60 * 1000
+        const temp21 = (closest !== null && closestDiff <= MAX_TOLERANCE_MS) ? closest : null
+        if (temp21 === null) return null
 
-        if (temp22 === null) return null
-
-        // Wind: use OWM forecast wind (no wind sensor on device; field5 = rain humidity)
-        if (forecastWind === null && list?.length) {
+        // Wind: tidak ada sensor angin di perangkat (field5 = kelembapan hujan), jadi tetap pakai prakiraan OWM
+        let forecastWind = 0
+        if (list?.length) {
             const nearest = list.find(item => {
                 const t = moment(item.dt_txt)
-                return t.isSame(now, 'day') && t.hour() >= currentHour
+                return t.isSame(now, 'day') && t.hour() >= now.hour()
             })
             forecastWind = nearest?.wind?.speed ?? 0
         }
 
-        const coldEnough = temp22 < 6
-        const calmWind = (forecastWind ?? 0) < 3
+        const coldEnough = temp21 < 5
+        const calmWind = forecastWind < 3
 
         if (coldEnough && calmWind) {
-            return `Suhu pukul 22.00 diprediksi ${temp22.toFixed(1)}°C dengan angin lemah — embun es kemungkinan besar terjadi besok pagi (04.00–06.00).`
+            return `Suhu sensor pukul 21.00 tercatat ${temp21.toFixed(1)}°C dengan angin tenang — embun es berpotensi besar muncul dini hari nanti sekitar jam 04.00–06.00.`
         } else if (coldEnough && !calmWind) {
-            return `Suhu pukul 22.00 cukup rendah (${temp22.toFixed(1)}°C) namun angin cukup kencang — embun es mungkin tidak terbentuk.`
+            return `Suhu sensor pukul 21.00 cukup rendah (${temp21.toFixed(1)}°C), tapi anginnya lumayan kencang, jadi embun es kemungkinan besar tidak akan terbentuk.`
         } else {
-            return `Suhu pukul 22.00 diprediksi ${temp22.toFixed(1)}°C — embun es tidak diprediksi besok pagi.`
+            return `Suhu sensor pukul 21.00 tercatat ${temp21.toFixed(1)}°C — masih terlalu hangat untuk munculnya embun es dini hari nanti.`
         }
     })
 
@@ -67,9 +65,9 @@ export function useAnalytics(feedData, mainData, predictionData) {
         const avgSecond = temps.slice(mid).reduce((a, b) => a + b, 0) / (temps.length - mid)
         const diff = avgSecond - avgFirst
 
-        if (diff < -1.5) return `Suhu cenderung turun ${Math.abs(diff).toFixed(1)}°C dibanding awal periode ini.`
-        if (diff > 1.5) return `Suhu cenderung naik ${diff.toFixed(1)}°C dibanding awal periode ini.`
-        return `Suhu relatif stabil pada periode ini (selisih ${Math.abs(diff).toFixed(1)}°C).`
+        if (diff < -1.5) return `Suhu terlihat menurun sekitar ${Math.abs(diff).toFixed(1)}°C dibanding awal periode ini.`
+        if (diff > 1.5) return `Suhu terlihat naik sekitar ${diff.toFixed(1)}°C dibanding awal periode ini.`
+        return `Suhu cenderung stabil sepanjang periode ini, hanya berbeda tipis sekitar ${Math.abs(diff).toFixed(1)}°C.`
     })
 
     // Current live conditions from ThingSpeak mainData
@@ -79,19 +77,24 @@ export function useAnalytics(feedData, mainData, predictionData) {
         const pressure = parseFloat(mainData.value?.field3)
         if (isNaN(temp)) return null
 
+        const currentHour = moment().hour()
+        const inFrostWindow = currentHour >= 21 || currentHour < 7
+
         const parts = []
-        if (temp < 6) parts.push(`Suhu sangat dingin (${Math.floor(temp)}°C) — waspada embun es`)
-        else if (temp < 10) parts.push(`Suhu sangat dingin (${Math.floor(temp)}°C)`)
-        else if (temp < 15) parts.push(`Suhu dingin (${Math.floor(temp)}°C)`)
-        else parts.push(`Suhu sejuk (${Math.floor(temp)}°C)`)
+        if (inFrostWindow && temp < 5) parts.push(`suhu sangat dingin, ${Math.floor(temp)}°C — berpotensi embun es`)
+        else if (temp < 6) parts.push(`suhu sangat dingin di ${Math.floor(temp)}°C`)
+        else if (temp < 10) parts.push(`suhu masih sangat dingin di ${Math.floor(temp)}°C`)
+        else if (temp < 15) parts.push(`suhu terasa dingin, sekitar ${Math.floor(temp)}°C`)
+        else parts.push(`suhu sejuk, sekitar ${Math.floor(temp)}°C`)
 
         if (!isNaN(humidity)) {
-            if (humidity > 90) parts.push('kelembapan sangat tinggi')
-            else if (humidity > 80) parts.push('kelembapan tinggi')
+            if (humidity > 90) parts.push('udara terasa sangat lembap')
+            else if (humidity > 80) parts.push('kelembapan udara cukup tinggi')
         }
-        if (!isNaN(pressure) && pressure < 793) parts.push('tekanan rendah — potensi hujan')
+        if (!isNaN(pressure) && pressure < 793) parts.push('tekanan udara rendah, jadi ada potensi hujan')
 
-        return parts.join(', ') + '.'
+        const sentence = parts.join(', ')
+        return sentence.charAt(0).toUpperCase() + sentence.slice(1) + '.'
     })
 
     // 24-hour forecast summary from OWM
@@ -108,11 +111,11 @@ export function useAnalytics(feedData, mainData, predictionData) {
         const maxTemp = Math.max(...temps)
 
         if (rainEntries.length >= 5) {
-            return `Prakiraan 24 jam: hujan mendominasi. Suhu antara ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
+            return `Dalam 24 jam ke depan, hujan diperkirakan mendominasi dengan suhu berkisar ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
         } else if (rainEntries.length > 0) {
-            return `Prakiraan 24 jam: berpotensi hujan ${rainEntries.length} periode. Suhu antara ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
+            return `Dalam 24 jam ke depan, ada potensi hujan di ${rainEntries.length} periode, dengan suhu berkisar ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
         }
-        return `Prakiraan 24 jam: cerah hingga berawan. Suhu antara ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
+        return `Dalam 24 jam ke depan, cuaca diperkirakan cerah hingga berawan, dengan suhu berkisar ${minTemp.toFixed(0)}–${maxTemp.toFixed(0)}°C.`
     })
 
     return { embunEsPrediction, tempTrend, currentInsight, forecastSummary }

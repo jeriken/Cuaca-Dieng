@@ -93,11 +93,11 @@
         </div>
 
         <!-- Suhu Ekstrem — 1/3 width -->
-        <div class="col-span-12 md:col-span-4 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl px-5 py-4 transition-colors duration-300 flex flex-col justify-center">
+        <div class="col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl px-5 py-4 transition-colors duration-300 flex flex-col justify-center">
             <h3 class="font-semibold text-slate-600 dark:text-slate-300 mb-3 tracking-wide text-xs uppercase">Suhu Ekstrem</h3>
             <div class="flex flex-col gap-3">
                 <div class="flex items-center gap-3">
-                    <img class="w-7 h-7" src="/icon/hot.png" />
+                    <img class="w-7 h-7" src="/icon/hot.webp" width="28" height="28" alt="" />
                     <div class="flex-1">
                         <p class="text-sm text-slate-700 dark:text-slate-200 font-medium">Suhu Tertinggi</p>
                         <p class="text-xs text-slate-400 dark:text-slate-500">Periode ini</p>
@@ -106,7 +106,7 @@
                 </div>
                 <div class="h-px bg-slate-100 dark:bg-white/10"></div>
                 <div class="flex items-center gap-3">
-                    <img class="w-7 h-7" src="/icon/cold.png" />
+                    <img class="w-7 h-7" src="/icon/cold.webp" width="28" height="28" alt="" />
                     <div class="flex-1">
                         <p class="text-sm text-slate-700 dark:text-slate-200 font-medium">Suhu Terendah</p>
                         <p class="text-xs text-slate-400 dark:text-slate-500">Periode ini</p>
@@ -117,7 +117,7 @@
         </div>
 
         <!-- Air Quality widget — 1/3 width -->
-        <div class="col-span-12 md:col-span-4 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col justify-center">
+        <div class="col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col justify-center">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="font-semibold text-slate-600 dark:text-slate-300 tracking-wide text-xs uppercase">Kualitas Udara</h3>
                 <span v-if="aqiInfo" :class="[aqiInfo.text, 'text-xs font-bold']">{{ aqiInfo.label }}</span>
@@ -137,7 +137,7 @@
                             <span class="text-[9px] text-slate-400 dark:text-slate-500">/ 5</span>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1">{{ aqiInfo.desc }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1 line-clamp-2">{{ aqiInfo.desc }}</p>
                 </div>
 
                 <!-- Pollutant grid -->
@@ -165,26 +165,65 @@
             </template>
         </div>
 
-        <!-- Map card — 1/3 width, no padding so iframe fills fully -->
-        <div class="col-span-12 md:col-span-4 overflow-hidden rounded-2xl border border-slate-100 shadow-sm dark:border-white/10">
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3958.31350226444!2d109.90474991411338!3d-7.205029272731311!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700cfe8a2a15eb%3A0xcfd9233d8b8bbb51!2sCandi%20Arjuna!5e0!3m2!1sid!2sid!4v1597120369515!5m2!1sid!2sid"
-                width="100%" height="100%" frameborder="0" style="border:0; display:block; min-height:180px;" allowfullscreen=""
-                aria-hidden="false" tabindex="0"></iframe>
-        </div>
+        <!-- Travelink promo banner — 1/3 width -->
+        <a href="https://travelink.fun" target="_blank" rel="noopener"
+            class="group relative col-span-12 md:col-span-4 overflow-hidden rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none min-h-[180px] flex flex-col justify-between p-4 transition-transform duration-300 hover:-translate-y-0.5">
+            <!-- Gradient backdrop -->
+            <div class="absolute inset-0 bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-500 dark:from-transparent dark:via-transparent dark:to-transparent dark:bg-white/5"></div>
+            <div class="absolute inset-0 hidden dark:block bg-gradient-to-br from-sky-500/10 via-cyan-500/10 to-emerald-500/10"></div>
+
+            <!-- Decorative blobs -->
+            <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10 dark:bg-sky-400/10 blur-xl group-hover:scale-110 transition-transform duration-500"></div>
+            <div class="absolute -bottom-10 -left-6 w-28 h-28 rounded-full bg-white/10 dark:bg-emerald-400/10 blur-xl group-hover:scale-110 transition-transform duration-500"></div>
+
+            <!-- Mountain silhouette -->
+            <svg class="absolute bottom-0 left-0 w-full h-16 opacity-25 dark:opacity-10" viewBox="0 0 200 60" preserveAspectRatio="none" fill="none">
+                <path d="M0 60 L30 20 L55 42 L85 8 L115 38 L150 15 L175 40 L200 25 L200 60 Z" class="fill-white dark:fill-sky-200" />
+            </svg>
+
+            <!-- Top row: badge -->
+            <div class="relative z-10 flex items-center justify-between">
+                <span class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-white/90 dark:text-sky-300 bg-white/15 dark:bg-sky-500/10 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" class="stroke-white dark:stroke-sky-300" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                    Rekomendasi
+                </span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="stroke-white/70 dark:stroke-slate-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+                    <path d="M7 17L17 7M7 7h10v10" />
+                </svg>
+            </div>
+
+            <!-- Bottom: content -->
+            <div class="relative z-10">
+                <h3 class="font-display font-bold text-xl text-white dark:text-slate-100 leading-tight drop-shadow-sm dark:drop-shadow-none">
+                    Jelajahi Dieng<br />bersama kami
+                </h3>
+                <p class="text-[11px] text-white/85 dark:text-slate-400 mt-1 leading-relaxed">
+                    Destinasi, jeep tour, penginapan & rencana perjalanan instan — semua dalam satu platform.
+                </p>
+                <span class="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-white dark:bg-transparent border border-transparent dark:border-sky-400/30 px-3 py-1.5 rounded-xl group-hover:bg-white/90 dark:group-hover:bg-sky-500/10 transition-colors">
+                    Kunjungi travelink.fun
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" class="stroke-sky-700 dark:stroke-sky-300" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                </span>
+            </div>
+        </a>
     </div>
 </template>
 
 <script>
-import { ref, computed, watch, onUpdated } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
-import moment from 'moment/min/moment-with-locales';
+import { ref, computed, watch, onUpdated, defineAsyncComponent } from 'vue';
+import moment from 'moment';
+import 'moment/locale/id';
 import { useDarkMode } from '../composables/useDarkMode.js';
 moment.locale('id');
 
 export default {
     components: {
-        apexchart: VueApexCharts,
+        apexchart: defineAsyncComponent(() => import('vue3-apexcharts')),
     },
     props: ['data', 'daily', 'chartLoading', 'prediction', 'analytics', 'aqiData'],
     setup(props) {
