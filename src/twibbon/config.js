@@ -3,7 +3,7 @@
 
 export const TREND_HASHTAG = '#DiengBerapaDerajat'
 export const BRAND_HASHTAG = '#CuacaDieng'
-export const BRAND_HANDLE = '@cuacadieng'
+export const BRAND_HANDLE = '@CuacaDieng'
 export const BRAND_NAME = 'CUACA DIENG'
 export const STATION_NAME = 'Dieng Kulon'
 

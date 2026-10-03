@@ -273,7 +273,6 @@ const scene = computed(() => {
         data: data.value,
         spot: spot.value,
         caption: caption.value.trim(),
-        host: HOST,
         photo: photo.value,
         view: photo.value ? clampView(view.value, photo.value, width, height) : view.value,
         assets,

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import moment from 'moment'
 import 'moment/locale/id'
@@ -30,7 +30,7 @@ const apiKey = "4b1478b77341332e8c75532ba5057c19"
 const layoutReady = computed(() => !isLoading.value && !isChartLoading.value)
 const { target: highlightAnchor, isVisible: highlightVisible } = useLazyMount(layoutReady)
 
-const { embunEsPrediction, tempTrend, currentInsight, forecastSummary } = useAnalytics(feedData, mainData, predictionData)
+const { embunEsPrediction, tempTrend, currentInsight, forecastSummary } = useAnalytics(feedData, mainData, predictionData, isDaily)
 
 const analytics = { embunEsPrediction, tempTrend, currentInsight, forecastSummary }
 
@@ -92,6 +92,13 @@ const getSunData = async () => {
     if (data?.sys) sunData.value = data.sys
 }
 
+const periodTabs = [
+    { key: 'harian',   label: 'Harian',   args: [1, 60, false] },
+    { key: 'mingguan', label: 'Mingguan', args: [7, 1440, true] },
+    { key: 'bulanan',  label: 'Bulanan',  args: [30, 'daily', true] },
+]
+const activeTabIndex = computed(() => periodTabs.findIndex(t => t.key === activeMenu.value))
+
 onMounted(async () => {
     await getMainData()
     isLoading.value = false
@@ -100,27 +107,39 @@ onMounted(async () => {
     await getAqiData()
     await getSunData()
 
-    setInterval(async () => {
-        await getMainData()
-    }, 60000)
+    timers.push(setInterval(getMainData, 60000))
+    timers.push(setInterval(getAqiData, 600000))
+    // Background tabs throttle timers — catch up as soon as the page is visible again
+    document.addEventListener('visibilitychange', onVisible)
+})
 
-    setInterval(async () => {
-        await getAqiData()
-    }, 600000)
+const timers = []
+const onVisible = () => { if (document.visibilityState === 'visible') getMainData() }
+onUnmounted(() => {
+    timers.forEach(clearInterval)
+    document.removeEventListener('visibilitychange', onVisible)
 })
 </script>
 
 <template>
     <div class="grid grid-cols-11">
         <div class="col-span-11 md:col-span-5 lg:col-span-4 xl:col-span-3 min-h-screen md:h-screen flex flex-col md:sticky top-0 bg-slate-50 dark:bg-[#0d1a2e] transition-colors duration-300">
-            <Main :data="mainData" :loading="isLoading" :sunData="sunData" />
+            <Main :data="mainData" :loading="isLoading" />
         </div>
         <main class="col-span-11 md:col-span-6 lg:col-span-7 xl:col-span-8 bg-slate-100 dark:bg-[#0a1524] p-8 transition-colors duration-300">
             <div class="grid grid-cols-12 mb-8 items-center">
-                <div class="col-span-12 md:col-span-6 flex justify-center md:justify-start gap-6">
-                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(1, 60, false)" :class="activeMenu === 'harian' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Harian</button>
-                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(7, 1440, true)" :class="activeMenu === 'mingguan' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Mingguan</button>
-                    <button class="font-semibold text-lg transition-colors duration-200" @click="changeTime(30, 'daily', true)" :class="activeMenu === 'bulanan' ? 'text-sky-500 dark:text-sky-400 underline underline-offset-8' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'">Bulanan</button>
+                <div class="col-span-12 md:col-span-6 flex justify-center md:justify-start">
+                    <!-- Segmented period switch with a sliding indicator -->
+                    <div class="relative grid grid-cols-3 p-1 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none" role="tablist">
+                        <span class="absolute top-1 bottom-1 left-1 rounded-xl bg-sky-500 shadow-md shadow-sky-500/30 transition-transform duration-300 ease-out"
+                            :style="{ width: 'calc((100% - 0.5rem) / 3)', transform: `translateX(${activeTabIndex * 100}%)` }"></span>
+                        <button v-for="tab in periodTabs" :key="tab.key" role="tab" :aria-selected="activeMenu === tab.key"
+                            @click="changeTime(...tab.args)"
+                            class="press relative z-10 px-5 py-2 text-sm font-semibold rounded-xl transition-colors duration-200"
+                            :class="activeMenu === tab.key ? 'text-white' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200'">
+                            {{ tab.label }}
+                        </button>
+                    </div>
                 </div>
                 <div class="col-span-12 md:col-span-6 hidden md:flex md:justify-end md:items-center md:gap-3">
                     <!-- Label so users know what the switch does -->
@@ -131,7 +150,7 @@ onMounted(async () => {
                     <!-- Creative sliding sun/moon theme toggle -->
                     <button @click="toggleDark" role="switch" :aria-checked="isDark"
                         :title="isDark ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'"
-                        class="relative w-[72px] h-9 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-sky-400/40 overflow-hidden"
+                        class="press relative w-[72px] h-9 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-sky-400/40 overflow-hidden"
                         :class="isDark ? 'bg-slate-800 border border-white/10' : 'bg-gradient-to-b from-sky-300 to-sky-400 border border-sky-300'">
                         <!-- Stars (dark) -->
                         <span class="absolute left-2.5 top-2 w-0.5 h-0.5 rounded-full bg-white/80 transition-opacity duration-300" :class="isDark ? 'opacity-100' : 'opacity-0'"></span>
@@ -161,7 +180,7 @@ onMounted(async () => {
             </div>
             <Prediction :data="predictionData" :daily="isDaily" />
             <div ref="highlightAnchor" class="min-h-[605px]">
-                <Highlight v-if="highlightVisible" :data="feedData" :daily="isDaily" :chartLoading="isChartLoading" :prediction="predictionData" :analytics="analytics" :aqiData="aqiData" />
+                <Highlight v-if="highlightVisible" :data="feedData" :daily="isDaily" :chartLoading="isChartLoading" :prediction="predictionData" :analytics="analytics" :aqiData="aqiData" :sunData="sunData" />
                 <div v-else class="grid grid-cols-12 gap-4">
                     <div class="col-span-12 xl:col-span-8 h-[389px] rounded-2xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>
                     <div class="col-span-12 xl:col-span-4 h-[389px] rounded-2xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>

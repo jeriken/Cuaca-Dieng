@@ -2,122 +2,110 @@
     <div class="grid grid-cols-12 gap-4">
 
         <!-- Chart card — 2/3 width -->
-        <div class="col-span-12 xl:col-span-8 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col">
+        <div ref="chartCard" class="rise col-span-12 xl:col-span-8 scroll-mt-4 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col">
             <!-- Chart type toggle -->
             <div class="flex gap-2 mb-3 flex-wrap justify-center">
                 <button v-for="tab in chartTabs" :key="tab.key" @click="activeChart = tab.key"
                     :class="activeChart === tab.key
                         ? 'bg-sky-500 text-white'
                         : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'"
-                    class="text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors duration-200">
+                    class="press text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors duration-200">
                     {{ tab.label }}
                 </button>
             </div>
             <!-- Skeleton -->
-            <div v-if="chartLoading" class="h-[300px] rounded-xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>
-            <div v-else id="chart">
-                <apexchart ref="chart" type="line" height="300" :options="optionRekap" :series="dataRekap"></apexchart>
+            <div v-if="chartLoading" class="flex-1 min-h-[300px] rounded-xl bg-slate-100 dark:bg-white/5 animate-pulse"></div>
+            <!-- Grows to fill the card when the analysis column is taller. The chart is
+                 absolutely positioned so its own height never feeds back into the row's. -->
+            <div v-else ref="chartBox" id="chart" class="relative flex-1 min-h-[300px]">
+                <div class="absolute inset-0">
+                    <apexchart ref="chart" type="area" :height="chartHeight" :options="optionRekap" :series="dataRekap"></apexchart>
+                </div>
             </div>
         </div>
 
         <!-- Analytics card — 1/3 width, stretches to match chart card height -->
-        <div class="col-span-12 xl:col-span-4 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col">
+        <div class="rise col-span-12 xl:col-span-4 bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col">
             <h3 class="font-semibold text-slate-600 dark:text-slate-300 mb-3 tracking-wide text-xs uppercase">Analisis</h3>
 
             <!-- Skeleton -->
-            <div v-if="!analytics || (!analytics.embunEsPrediction.value && !analytics.tempTrend.value && !analytics.currentInsight.value && !analytics.forecastSummary.value)"
-                class="flex flex-col gap-2 flex-1">
-                <div v-for="i in 4" :key="i" class="flex-1 rounded-xl bg-slate-50 dark:bg-white/5 animate-pulse"></div>
+            <div v-if="!insightCards.some(c => c.insight)" class="flex flex-col gap-3">
+                <div v-for="i in 4" :key="i" class="h-12 rounded-xl bg-slate-50 dark:bg-white/5 animate-pulse"></div>
             </div>
 
-            <!-- Insight cards -->
-            <div v-else class="flex flex-col gap-2 flex-1">
-
-                <!-- Embun Es -->
-                <div v-if="analytics.embunEsPrediction.value"
-                    class="flex-1 flex gap-3 items-start bg-sky-50 dark:bg-sky-500/10 rounded-xl px-3 py-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="stroke-sky-500" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
-                            <path d="M2 12h20M12 2v20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-wide mb-0.5">Embun Es</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ analytics.embunEsPrediction.value }}</p>
-                    </div>
-                </div>
-
-                <!-- Temp trend -->
-                <div v-if="analytics.tempTrend.value"
-                    class="flex-1 flex gap-3 items-start bg-orange-50 dark:bg-orange-500/10 rounded-xl px-3 py-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="stroke-orange-500" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-semibold text-orange-500 dark:text-orange-400 uppercase tracking-wide mb-0.5">Tren Suhu</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ analytics.tempTrend.value }}</p>
-                    </div>
-                </div>
-
-                <!-- Current insight -->
-                <div v-if="analytics.currentInsight.value"
-                    class="flex-1 flex gap-3 items-start bg-emerald-50 dark:bg-emerald-500/10 rounded-xl px-3 py-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="stroke-emerald-500" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400 uppercase tracking-wide mb-0.5">Kondisi Kini</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ analytics.currentInsight.value }}</p>
-                    </div>
-                </div>
-
-                <!-- Forecast summary -->
-                <div v-if="analytics.forecastSummary.value"
-                    class="flex-1 flex gap-3 items-start bg-purple-50 dark:bg-purple-500/10 rounded-xl px-3 py-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="stroke-purple-500" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
-                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-semibold text-purple-500 dark:text-purple-400 uppercase tracking-wide mb-0.5">Prakiraan</p>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ analytics.forecastSummary.value }}</p>
-                    </div>
-                </div>
-
+            <!-- Insight list — each row links to the chart that backs it up. Rows share
+                 the card's height evenly so it lines up with the chart beside it. -->
+            <div v-else class="flex-1 flex flex-col divide-y divide-slate-100 dark:divide-white/5">
+                <template v-for="card in insightCards" :key="card.key">
+                    <button v-if="card.insight" type="button" @click="showChart(card.chart)" title="Lihat grafik"
+                        class="group interactive flex-1 -mx-2 px-2 py-2 flex gap-3 items-center rounded-xl text-left hover:bg-slate-50 dark:hover:bg-white/5">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
+                            :class="card.iconBg">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" :class="card.stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" v-html="card.icon"></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] font-semibold uppercase tracking-wide leading-none" :class="card.label">{{ card.title }}</p>
+                            <p class="font-display text-[15px] font-bold leading-tight text-slate-800 dark:text-slate-100 mt-1">{{ card.insight.value }}</p>
+                            <p class="text-[11px] leading-snug text-slate-400 dark:text-slate-500 mt-0.5 [text-wrap:pretty]">{{ card.insight.text }}</p>
+                        </div>
+                    </button>
+                </template>
             </div>
         </div>
 
         <!-- Suhu Ekstrem — 1/3 width -->
-        <div class="col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl px-5 py-4 transition-colors duration-300 flex flex-col justify-center">
-            <h3 class="font-semibold text-slate-600 dark:text-slate-300 mb-3 tracking-wide text-xs uppercase">Suhu Ekstrem</h3>
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center gap-3">
-                    <img class="w-7 h-7" src="/icon/hot.webp" width="28" height="28" alt="" />
-                    <div class="flex-1">
-                        <p class="text-sm text-slate-700 dark:text-slate-200 font-medium">Suhu Tertinggi</p>
-                        <p class="text-xs text-slate-400 dark:text-slate-500">Periode ini</p>
+        <div class="rise col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl px-5 py-4 transition-colors duration-300 flex flex-col justify-center" style="animation-delay: 80ms">
+            <h3 class="font-semibold text-slate-600 dark:text-slate-300 mb-2 tracking-wide text-xs uppercase">Suhu Ekstrem</h3>
+            <!-- Tap a row to pin that point on the temperature chart -->
+            <div class="flex flex-col gap-1">
+                <button v-for="ex in extremes" :key="ex.key" type="button" @click="focusExtreme(ex.key)"
+                    :aria-pressed="pinnedExtreme === ex.key" title="Tandai di grafik"
+                    class="group interactive -mx-2 px-2 py-1.5 rounded-xl flex items-center gap-3 text-left"
+                    :class="pinnedExtreme === ex.key ? ex.activeBg : 'hover:bg-slate-50 dark:hover:bg-white/5'">
+                    <img class="w-7 h-7 transition-transform duration-300 group-hover:scale-110" :src="ex.icon" width="28" height="28" alt="" />
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-slate-700 dark:text-slate-200 font-medium truncate">{{ ex.label }}</p>
+                        <!-- Single line, short text in both states so the row height never changes -->
+                        <p class="text-xs text-slate-400 dark:text-slate-500 truncate">
+                            {{ pinnedExtreme === ex.key ? `Tercatat ${ex.at}` : 'Periode ini' }}
+                        </p>
                     </div>
-                    <p class="font-display text-lg font-bold text-slate-800 dark:text-slate-100">{{ Math.floor(Math.max(...simpanSuhu)) }}°<span class="text-sm font-normal text-slate-400"> C</span></p>
-                </div>
-                <div class="h-px bg-slate-100 dark:bg-white/10"></div>
-                <div class="flex items-center gap-3">
-                    <img class="w-7 h-7" src="/icon/cold.webp" width="28" height="28" alt="" />
-                    <div class="flex-1">
-                        <p class="text-sm text-slate-700 dark:text-slate-200 font-medium">Suhu Terendah</p>
-                        <p class="text-xs text-slate-400 dark:text-slate-500">Periode ini</p>
-                    </div>
-                    <p class="font-display text-lg font-bold text-sky-500 dark:text-sky-400">{{ Math.floor(Math.min(...simpanSuhu)) }}°<span class="text-sm font-normal text-slate-400"> C</span></p>
-                </div>
+                    <p class="font-display text-lg font-bold" :class="ex.valueClass">{{ ex.value }}°<span class="text-sm font-normal text-slate-400"> C</span></p>
+                </button>
+            </div>
+            <!-- Sunrise / Sunset today — tap to toggle clock time vs. countdown -->
+            <div class="mt-2 pt-2 border-t border-slate-100 dark:border-white/10 text-xs">
+                <button v-if="sunriseTime && sunsetTime" type="button" @click="sunRelative = !sunRelative"
+                    class="interactive -mx-2 px-2 py-1 rounded-lg flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/5"
+                    style="width: calc(100% + 1rem)"
+                    :title="sunRelative ? 'Tampilkan jam' : 'Tampilkan hitung mundur'">
+                    <span class="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            class="stroke-amber-400 flex-shrink-0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="M12 2v4M4.93 10.93l2.83 2.83M1 18h4M19 18h4M18.07 10.93l-2.83 2.83M12 6a6 6 0 010 12M2 18h20" />
+                        </svg>
+                        <span class="text-slate-400 dark:text-slate-500">Terbit</span>
+                        <Transition name="swap" mode="out-in">
+                            <span :key="sunRelative" class="font-display font-semibold text-slate-700 dark:text-slate-200 tabular-nums">{{ sunRelative ? sunriseRel : sunriseTime }}</span>
+                        </Transition>
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            class="stroke-orange-400 flex-shrink-0" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                            <path d="M12 10v4M4.93 10.93l2.83 2.83M1 18h4M19 18h4M18.07 10.93l-2.83 2.83M12 6a6 6 0 010 12M2 18h20M5 22l7-4 7 4" />
+                        </svg>
+                        <span class="text-slate-400 dark:text-slate-500">Terbenam</span>
+                        <Transition name="swap" mode="out-in">
+                            <span :key="sunRelative" class="font-display font-semibold text-slate-700 dark:text-slate-200 tabular-nums">{{ sunRelative ? sunsetRel : sunsetTime }}</span>
+                        </Transition>
+                    </span>
+                </button>
+                <div v-else class="h-6 w-full rounded-md bg-slate-100 dark:bg-white/5 animate-pulse"></div>
             </div>
         </div>
 
         <!-- Air Quality widget — 1/3 width -->
-        <div class="col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col justify-center">
+        <div class="rise col-span-12 md:col-span-4 min-h-[180px] bg-white border border-slate-100 shadow-sm dark:bg-white/5 dark:backdrop-blur-md dark:border-white/10 dark:shadow-none rounded-2xl p-4 transition-colors duration-300 flex flex-col justify-center" style="animation-delay: 140ms">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="font-semibold text-slate-600 dark:text-slate-300 tracking-wide text-xs uppercase">Kualitas Udara</h3>
                 <span v-if="aqiInfo" :class="[aqiInfo.text, 'text-xs font-bold']">{{ aqiInfo.label }}</span>
@@ -130,23 +118,36 @@
                         <svg viewBox="0 0 36 36" class="w-14 h-14 -rotate-90">
                             <circle cx="18" cy="18" r="15.9155" fill="none" class="stroke-slate-100 dark:stroke-white/10" stroke-width="3" />
                             <circle cx="18" cy="18" r="15.9155" fill="none" :stroke="aqiInfo.color" stroke-width="3"
-                                stroke-linecap="round" :stroke-dasharray="`${(aqiData.main.aqi / 5) * 100}, 100`" />
+                                stroke-linecap="round" :stroke-dasharray="`${ringReady ? (aqiData.main.aqi / 5) * 100 : 0}, 100`"
+                                style="transition: stroke-dasharray 0.9s cubic-bezier(0.2, 0.8, 0.2, 1)" />
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="font-display font-bold text-base text-slate-800 dark:text-slate-100 leading-none">{{ aqiData.main.aqi }}</span>
                             <span class="text-[9px] text-slate-400 dark:text-slate-500">/ 5</span>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1 line-clamp-2">{{ aqiInfo.desc }}</p>
+                    <Transition name="swap" mode="out-in">
+                        <p :key="activePollutant?.name || 'desc'" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed flex-1 line-clamp-2">
+                            <template v-if="activePollutant">
+                                <span class="font-semibold text-slate-700 dark:text-slate-200">{{ activePollutant.name }} · {{ activePollutant.value.toFixed(1) }} {{ activePollutant.unit }}</span><br />{{ activePollutant.desc }}
+                            </template>
+                            <template v-else>{{ aqiInfo.desc }}</template>
+                        </p>
+                    </Transition>
                 </div>
 
                 <!-- Pollutant grid -->
                 <div class="grid grid-cols-2 gap-1.5">
-                    <div v-for="p in pollutants" :key="p.name"
-                        class="bg-slate-50 dark:bg-white/5 rounded-xl px-3 py-1.5 flex items-center justify-between transition-colors duration-300">
+                    <button v-for="p in pollutants" :key="p.name" type="button"
+                        @click="selectedPollutant = selectedPollutant === p.name ? null : p.name"
+                        :aria-pressed="selectedPollutant === p.name"
+                        class="interactive rounded-xl px-3 py-1.5 flex items-center justify-between border"
+                        :class="selectedPollutant === p.name
+                            ? 'bg-sky-50 border-sky-200 dark:bg-sky-500/10 dark:border-sky-400/30'
+                            : 'bg-slate-50 border-transparent hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10'">
                         <span class="text-xs text-slate-400 dark:text-slate-500">{{ p.name }}</span>
                         <span class="font-display text-xs font-semibold text-slate-700 dark:text-slate-200">{{ p.value.toFixed(1) }}</span>
-                    </div>
+                    </button>
                 </div>
             </template>
 
@@ -167,7 +168,7 @@
 
         <!-- Travelink promo banner — 1/3 width -->
         <a href="https://travelink.fun" target="_blank" rel="noopener"
-            class="group relative col-span-12 md:col-span-4 overflow-hidden rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none min-h-[180px] flex flex-col justify-between p-4 transition-transform duration-300 hover:-translate-y-0.5">
+            class="group relative col-span-12 md:col-span-4 overflow-hidden rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm dark:shadow-none min-h-[180px] flex flex-col justify-between p-4 interactive hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/20 rise" style="animation-delay: 200ms">
             <!-- Gradient backdrop -->
             <div class="absolute inset-0 bg-gradient-to-br from-sky-500 via-cyan-500 to-emerald-500 dark:from-transparent dark:via-transparent dark:to-transparent dark:bg-white/5"></div>
             <div class="absolute inset-0 hidden dark:block bg-gradient-to-br from-sky-500/10 via-cyan-500/10 to-emerald-500/10"></div>
@@ -215,17 +216,18 @@
 </template>
 
 <script>
-import { ref, computed, watch, onUpdated, defineAsyncComponent } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, onUpdated, defineAsyncComponent } from 'vue';
 import moment from 'moment';
 import 'moment/locale/id';
 import { useDarkMode } from '../composables/useDarkMode.js';
+import { relativeTime } from '../utils/relativeTime.js';
 moment.locale('id');
 
 export default {
     components: {
         apexchart: defineAsyncComponent(() => import('vue3-apexcharts')),
     },
-    props: ['data', 'daily', 'chartLoading', 'prediction', 'analytics', 'aqiData'],
+    props: ['data', 'daily', 'chartLoading', 'prediction', 'analytics', 'aqiData', 'sunData'],
     setup(props) {
         const { isDark } = useDarkMode();
 
@@ -244,11 +246,38 @@ export default {
             if (!props.aqiData) return []
             const c = props.aqiData.components
             return [
-                { name: 'PM2.5', value: c.pm2_5, unit: 'μg/m³' },
-                { name: 'PM10',  value: c.pm10,  unit: 'μg/m³' },
-                { name: 'O₃',    value: c.o3,    unit: 'μg/m³' },
-                { name: 'NO₂',   value: c.no2,   unit: 'μg/m³' },
+                { name: 'PM2.5', value: c.pm2_5, unit: 'μg/m³', desc: 'Partikel halus yang bisa masuk ke paru-paru.' },
+                { name: 'PM10',  value: c.pm10,  unit: 'μg/m³', desc: 'Debu & partikel kasar, mis. dari jalan.' },
+                { name: 'O₃',    value: c.o3,    unit: 'μg/m³', desc: 'Ozon permukaan, naik saat siang terik.' },
+                { name: 'NO₂',   value: c.no2,   unit: 'μg/m³', desc: 'Gas dari asap kendaraan bermotor.' },
             ]
+        })
+        const selectedPollutant = ref(null)
+        const activePollutant = computed(() => pollutants.value.find(p => p.name === selectedPollutant.value) || null)
+
+        // AQI ring animates from empty once the data first arrives
+        const ringReady = ref(false)
+        watch(() => props.aqiData, (v) => {
+            if (v && !ringReady.value) setTimeout(() => { ringReady.value = true }, 50)
+        }, { immediate: true })
+
+        // Sunrise/sunset row can flip to a countdown ("3 jam lagi")
+        const sunRelative = ref(false)
+        const nowTick = ref(Date.now())
+        let tickTimer = null
+        onMounted(() => { tickTimer = setInterval(() => { nowTick.value = Date.now() }, 60000) })
+        onUnmounted(() => clearInterval(tickTimer))
+        const relFrom = (unix) => relativeTime(unix * 1000, nowTick.value)
+        const sunriseRel = computed(() => props.sunData?.sunrise ? relFrom(props.sunData.sunrise) : null)
+        const sunsetRel = computed(() => props.sunData?.sunset ? relFrom(props.sunData.sunset) : null)
+
+        const sunriseTime = computed(() => {
+            if (!props.sunData?.sunrise) return null
+            return moment.unix(props.sunData.sunrise).utcOffset(7).format('HH:mm')
+        })
+        const sunsetTime = computed(() => {
+            if (!props.sunData?.sunset) return null
+            return moment.unix(props.sunData.sunset).utcOffset(7).format('HH:mm')
         })
         const arrange = ref(false);
         const dataSuhu = ref([]);
@@ -272,32 +301,95 @@ export default {
         }
 
         const chartMeta = {
-            suhu:    { yTitle: 'Temperatur (°C)',   title: 'Suhu' },
-            lembap:  { yTitle: 'Kelembapan (%)',    title: 'Kelembapan' },
-            tekanan: { yTitle: 'Tekanan (mBar)',    title: 'Tekanan Udara' },
-            angin:   { yTitle: 'Kecepatan (m/s)',   title: 'Prakiraan Angin 24 Jam Ke Depan' },
+            suhu:    { unit: '°C',    axisUnit: '°', title: 'Suhu' },
+            lembap:  { unit: '%',     axisUnit: '%', title: 'Kelembapan' },
+            tekanan: { unit: ' mBar', axisUnit: '',  title: 'Tekanan Udara' },
+            angin:   { unit: ' m/s',  axisUnit: '',  title: 'Prakiraan Angin 24 Jam Ke Depan' },
         }
+        const fmtNum = (n, d = 1) => n.toLocaleString('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d })
 
         const windData = computed(() => {
             if (!props.prediction?.list) return []
-            const now = new Date()
-            const pad = (n) => String(n).padStart(2, '0')
-            const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-            const currentHour = now.getHours()
-            const future = props.prediction.list.filter(item => {
-                const [date, time] = item.dt_txt.split(' ')
-                const hour = parseInt(time.slice(0, 2), 10)
-                if (date > todayStr) return true
-                if (date === todayStr && hour > currentHour) return true
-                return false
-            })
-            return future.slice(0, 8).map(item => ({
-                x: item.dt_txt.split(' ')[1].slice(0, 5),
-                y: parseFloat(item.wind.speed.toFixed(1)),
-            }))
+            // dt is unix UTC (dt_txt is UTC too) — show WIB labels
+            const now = Date.now() / 1000
+            return props.prediction.list
+                .filter(item => item.dt > now)
+                .slice(0, 8)
+                .map(item => ({
+                    x: moment.unix(item.dt).utcOffset(7).format('HH:mm'),
+                    y: parseFloat(item.wind.speed.toFixed(1)),
+                }))
         })
 
         const dataRekap = ref([{ name: 'Suhu', data: [] }]);
+
+        // Insight cards double as shortcuts to the chart that backs them up
+        const chartCard = ref(null)
+
+        // Chart height follows its container (see template) — measured, since
+        // ApexCharts needs a pixel height to keep option updates stable.
+        const chartBox = ref(null)
+        const chartHeight = ref(300)
+        let chartObserver = null
+        watch(chartBox, (el) => {
+            chartObserver?.disconnect()
+            if (!el) return
+            chartObserver = new ResizeObserver(([entry]) => {
+                const h = Math.round(entry.contentRect.height)
+                if (h > 0 && h !== chartHeight.value) chartHeight.value = h
+            })
+            chartObserver.observe(el)
+        })
+        onUnmounted(() => chartObserver?.disconnect())
+        const showChart = (key) => {
+            activeChart.value = key
+            const el = chartCard.value
+            if (!el) return
+            const r = el.getBoundingClientRect()
+            // Only scroll when the chart is entirely off-screen — if any of it is
+            // visible the user can already see the change, and jumping is jarring.
+            if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+        const insightCards = computed(() => {
+            const a = props.analytics
+            if (!a) return []
+            return [
+                { key: 'embun', title: 'Embun Es', insight: a.embunEsPrediction.value, chart: 'suhu',
+                  iconBg: 'bg-sky-100 dark:bg-sky-500/20', stroke: 'stroke-sky-500', label: 'text-sky-500 dark:text-sky-400',
+                  icon: '<path d="M2 12h20M12 2v20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07" />' },
+                { key: 'tren', title: 'Tren Suhu', insight: a.tempTrend.value, chart: 'suhu',
+                  iconBg: 'bg-orange-100 dark:bg-orange-500/20', stroke: 'stroke-orange-500', label: 'text-orange-500 dark:text-orange-400',
+                  icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />' },
+                { key: 'kini', title: 'Kondisi Kini', insight: a.currentInsight.value, chart: 'lembap',
+                  iconBg: 'bg-emerald-100 dark:bg-emerald-500/20', stroke: 'stroke-emerald-500', label: 'text-emerald-500 dark:text-emerald-400',
+                  icon: '<circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />' },
+                { key: 'prakiraan', title: 'Prakiraan', insight: a.forecastSummary.value, chart: 'angin',
+                  iconBg: 'bg-purple-100 dark:bg-purple-500/20', stroke: 'stroke-purple-500', label: 'text-purple-500 dark:text-purple-400',
+                  icon: '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" />' },
+            ]
+        })
+
+        // Suhu Ekstrem rows pin their point on the temperature chart
+        const pinnedExtreme = ref(null)
+        const extremePoint = (kind) => {
+            const pts = allSeries.value.suhu.filter(p => p.y != null && !isNaN(p.y))
+            if (!pts.length) return null
+            return pts.reduce((best, p) => (kind === 'max' ? p.y > best.y : p.y < best.y) ? p : best)
+        }
+        const extremes = computed(() => {
+            const max = extremePoint('max'), min = extremePoint('min')
+            return [
+                { key: 'max', label: 'Suhu Tertinggi', icon: '/icon/hot.webp', value: Math.floor(Math.max(...simpanSuhu.value)), at: max?.x,
+                  valueClass: 'text-slate-800 dark:text-slate-100', activeBg: 'bg-orange-50 dark:bg-orange-500/10' },
+                { key: 'min', label: 'Suhu Terendah', icon: '/icon/cold.webp', value: Math.floor(Math.min(...simpanSuhu.value)), at: min?.x,
+                  valueClass: 'text-sky-500 dark:text-sky-400', activeBg: 'bg-sky-50 dark:bg-sky-500/10' },
+            ]
+        })
+        const focusExtreme = (kind) => {
+            if (pinnedExtreme.value === kind) { pinnedExtreme.value = null; return }
+            pinnedExtreme.value = kind
+            showChart('suhu')
+        }
 
         const updateChartSeries = () => {
             if (activeChart.value === 'angin') {
@@ -317,63 +409,111 @@ export default {
             const labelColor = dark ? '#64748b' : '#94a3b8';
             const gridColor = dark ? '#ffffff10' : '#e2e8f0';
             const titleColor = dark ? '#f1f5f9' : '#0f172a';
-            const axisColor = dark ? '#1e293b' : '#e2e8f0';
+            const font = 'Plus Jakarta Sans, system-ui, sans-serif';
             const meta = chartMeta[activeChart.value]
             const color = chartColors[activeChart.value]
             const periodLabel = formatDaily.value ? 'periode ini' : '24 jam terakhir'
             const chartTitle = activeChart.value === 'angin' ? meta.title : `${meta.title} — ${periodLabel}`
 
+            const pinned = activeChart.value === 'suhu' && pinnedExtreme.value ? extremePoint(pinnedExtreme.value) : null
+            const pinColor = pinnedExtreme.value === 'max' ? '#f97316' : '#0ea5e9'
+            // Anchor the label away from the chart edges so it never gets clipped
+            const pinPos = pinned ? allSeries.value.suhu.indexOf(pinned) / Math.max(allSeries.value.suhu.length - 1, 1) : 0
+            const pinAnchor = pinPos > 0.75 ? 'end' : pinPos < 0.25 ? 'start' : 'middle'
+
             return {
+                annotations: {
+                    points: pinned ? [{
+                        x: pinned.x,
+                        y: pinned.y,
+                        marker: { size: 6, fillColor: pinColor, strokeColor: dark ? '#0a1524' : '#fff', strokeWidth: 3 },
+                        label: {
+                            text: `${pinnedExtreme.value === 'max' ? 'Tertinggi' : 'Terendah'} ${pinned.y.toFixed(1)}°C`,
+                            borderColor: pinColor,
+                            textAnchor: pinAnchor,
+                            offsetY: -6,
+                            style: { background: pinColor, color: '#fff', fontSize: '11px', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
+                        },
+                    }] : [],
+                },
                 chart: {
-                    height: 250,
-                    type: 'line',
+                    height: chartHeight.value, // must match the <apexchart height> prop, or option updates shrink the chart
+                    type: 'area',
                     background: 'transparent',
                     foreColor: labelColor,
+                    fontFamily: font,
                     zoom: { enabled: false },
                     toolbar: { show: false },
                 },
                 theme: { mode: dark ? 'dark' : 'light' },
                 colors: [color],
                 dataLabels: { enabled: false },
-                stroke: { width: [2.5], curve: 'smooth', dashArray: [0] },
+                stroke: { width: 2.5, curve: 'smooth', lineCap: 'round' },
+                // Soft wash under the line that fades out toward the axis
+                fill: {
+                    type: 'gradient',
+                    gradient: { shadeIntensity: 0, opacityFrom: dark ? 0.3 : 0.25, opacityTo: 0, stops: [0, 95] },
+                },
                 title: {
                     text: chartTitle,
                     align: 'left',
-                    style: {
-                        color: titleColor,
-                        fontSize: '13px',
-                        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-                        fontWeight: 600,
-                    },
+                    style: { color: titleColor, fontSize: '13px', fontFamily: font, fontWeight: 600 },
                 },
-                legend: {
-                    tooltipHoverFormatter: function (val, opts) {
-                        return val + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>';
-                    },
+                markers: {
+                    size: 0,
+                    colors: [color],
+                    strokeColors: dark ? '#0a1524' : '#ffffff',
+                    strokeWidth: 3,
+                    hover: { size: 6 },
                 },
-                markers: { size: 0, hover: { sizeOffset: 6 } },
                 yaxis: {
-                    title: {
-                        text: meta.yTitle,
-                        style: { color: labelColor, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
-                    },
+                    tickAmount: 4,
                     labels: {
-                        style: { colors: labelColor, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
+                        style: { colors: labelColor, fontFamily: font },
+                        formatter: (v) => v == null ? '' : `${fmtNum(v, activeChart.value === 'angin' ? 1 : 0)}${meta.axisUnit}`,
                     },
                 },
                 xaxis: {
                     type: 'category',
-                    tickAmount: 10,
-                    labels: {
-                        style: { colors: labelColor, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
-                    },
-                    axisBorder: { color: axisColor },
-                    axisTicks: { color: axisColor },
+                    tickAmount: 8,
+                    labels: { rotate: 0, hideOverlappingLabels: true, style: { colors: labelColor, fontFamily: font } },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    crosshairs: { stroke: { color: color, width: 1, dashArray: 4 } },
+                    tooltip: { enabled: false },
                 },
-                grid: { borderColor: gridColor },
+                grid: {
+                    borderColor: gridColor,
+                    strokeDashArray: 4,
+                    xaxis: { lines: { show: false } },
+                    padding: { left: 4, right: 8 },
+                },
+                // Floating card: time, value, and change from the previous point
                 tooltip: {
-                    theme: dark ? 'dark' : 'light',
-                    style: { fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
+                    shared: false,
+                    intersect: false,
+                    custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+                        const v = series[seriesIndex][dataPointIndex]
+                        if (v == null) return ''
+                        const prev = dataPointIndex > 0 ? series[seriesIndex][dataPointIndex - 1] : null
+                        const label = w.config.series[seriesIndex].data[dataPointIndex]?.x ?? ''
+                        let delta = ''
+                        if (prev != null) {
+                            const d = v - prev
+                            const cls = Math.abs(d) < 0.05 ? 'text-slate-400' : d > 0 ? 'text-orange-500' : 'text-sky-500'
+                            const arrow = Math.abs(d) < 0.05 ? '•' : d > 0 ? '▲' : '▼'
+                            delta = `<span class="${cls} text-[11px] font-semibold">${arrow} ${fmtNum(Math.abs(d))}</span>`
+                        }
+                        return `<div class="px-3 py-2 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-slate-100 dark:border-white/10 shadow-lg shadow-slate-900/10">
+                            <div class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                <span class="w-1.5 h-1.5 rounded-full" style="background:${color}"></span>${label}
+                            </div>
+                            <div class="flex items-baseline gap-2 mt-0.5">
+                                <span class="font-display text-base font-bold text-slate-800 dark:text-slate-100">${fmtNum(v)}<span class="text-xs font-medium text-slate-400">${meta.unit}</span></span>
+                                ${delta}
+                            </div>
+                        </div>`
+                    },
                 },
             };
         });
@@ -403,6 +543,7 @@ export default {
         };
 
         watch(() => props.data, (data) => {
+            pinnedExtreme.value = null;
             arrange.value = false;
             dataSuhu.value = data;
             if (data?.feeds) arrangeData(data.feeds);
@@ -438,6 +579,22 @@ export default {
             chartTabs,
             aqiInfo,
             pollutants,
+            sunriseTime,
+            sunsetTime,
+            sunRelative,
+            sunriseRel,
+            sunsetRel,
+            selectedPollutant,
+            activePollutant,
+            ringReady,
+            chartCard,
+            chartBox,
+            chartHeight,
+            showChart,
+            insightCards,
+            extremes,
+            pinnedExtreme,
+            focusExtreme,
         };
     },
 };

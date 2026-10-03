@@ -1,6 +1,6 @@
 // "Poster" — the temperature as a huge headline over the photo.
 
-import { TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
 import {
     AMBER, BODY, CAP, DISPLAY, clearShadow, drawBadgePill, drawBrand, drawIcon, drawText,
     fitLine, setFont, setShadow, textWidth, verticalGradient,
@@ -124,10 +124,8 @@ export default {
         setFont(ctx, 24, 700, BODY)
         ctx.fillStyle = '#ffffff'
         drawText(ctx, TREND_HASHTAG, left, footerY)
-        if (s.host) {
-            setFont(ctx, 24, 500, BODY)
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
-            drawText(ctx, s.host, W - safe.x, footerY, { align: 'right' })
-        }
+        setFont(ctx, 24, 500, BODY)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+        drawText(ctx, BRAND_HANDLE, W - safe.x, footerY, { align: 'right' })
     },
 }

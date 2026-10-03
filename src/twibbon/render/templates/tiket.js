@@ -1,6 +1,6 @@
 // "Tiket" — a boarding pass to Dieng, "Negeri di Atas Awan".
 
-import { TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
 import {
     AMBER, BODY, CAP, DISPLAY, NAVY, clearShadow, drawBarcode, drawBrand, drawEmblem, drawText,
     fitLine, setFont, setShadow, textWidth, verticalGradient,
@@ -167,11 +167,11 @@ export default {
         drawText(ctx, tag.text, barcodeX + barcodeWidth / 2, top + 28 * k + 78 * k + 34 * k, { align: 'center' })
         ctx.restore()
 
-        if (story && s.host) {
+        if (story) {
             setShadow(ctx, s, 10, 'rgba(0, 0, 0, 0.5)')
             setFont(ctx, 24, 600, BODY)
             ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
-            drawText(ctx, s.host, W / 2, y - 28, { align: 'center', spacing: 1 })
+            drawText(ctx, BRAND_HANDLE, W / 2, y - 28, { align: 'center', spacing: 1 })
             clearShadow(ctx)
         }
     },

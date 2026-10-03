@@ -23,3 +23,86 @@
     @apply transition-colors duration-300;
   }
 }
+
+/* ── Shared interaction layer ─────────────────────────────────────────────
+   Hover effects are gated behind (hover: hover) so touch devices don't get
+   "stuck" hover states; every interactive surface also gets a press state
+   and a keyboard focus ring so it feels alive on mobile and keyboard too. */
+@layer components {
+  .interactive {
+    @apply cursor-pointer select-none transition-[transform,box-shadow,background-color,border-color] duration-200 ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .interactive:active {
+    transform: scale(0.97);
+  }
+  .interactive:focus-visible,
+  .press:focus-visible {
+    @apply outline-none ring-2 ring-sky-400/60 ring-offset-2 ring-offset-slate-100 dark:ring-offset-[#0a1524];
+  }
+  @media (hover: hover) {
+    .interactive.lift:hover {
+      transform: translateY(-2px);
+      @apply shadow-md border-sky-200 dark:border-sky-400/30 dark:shadow-none;
+    }
+    .interactive.lift:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+
+  /* Small controls (pills, icon buttons) — press feedback only */
+  .press {
+    @apply transition-transform duration-150 ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .press:active {
+    transform: scale(0.92);
+  }
+
+  /* Staggered entrance for cards once data arrives */
+  .rise {
+    animation: rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-8deg) scale(1.05); }
+  75%      { transform: rotate(8deg) scale(1.05); }
+}
+
+.animate-float  { animation: float 5s ease-in-out infinite; }
+.animate-wiggle { animation: wiggle 0.5s ease-in-out; }
+
+/* Swap transition used by flip-style cards */
+.swap-enter-active, .swap-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.swap-enter-from { opacity: 0; transform: translateY(6px); }
+.swap-leave-to   { opacity: 0; transform: translateY(-6px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Chart tooltip — the card is drawn by our custom HTML, so strip Apex's own box */
+#chart .apexcharts-tooltip,
+#chart .apexcharts-tooltip.apexcharts-theme-light,
+#chart .apexcharts-tooltip.apexcharts-theme-dark {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
