@@ -2,11 +2,10 @@
 import { computed } from 'vue'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 import { BRAND_HANDLE, TREND_HASHTAG } from '../../twibbon/config.js'
-import BadgeEmblem from './BadgeEmblem.vue'
 
 const props = defineProps({
     open: { type: Boolean, default: false },
-    // { url, file, transparent, achievement: { newBadge, newRecord, badge } }
+    // { url, file, transparent, achievement: { newRecord } }
     result: { type: Object, default: null },
     canShare: { type: Boolean, default: false },
     inAppBrowser: { type: String, default: null },
@@ -33,7 +32,7 @@ const achievement = computed(() => props.result?.achievement)
                         <DialogPanel class="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl bg-white dark:bg-[#162032] border border-slate-100 dark:border-white/10 shadow-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                             <div class="flex items-start justify-between gap-3 mb-4">
                                 <div>
-                                    <DialogTitle class="text-lg font-semibold text-slate-800 dark:text-slate-100">Twibbon siap!</DialogTitle>
+                                    <DialogTitle class="text-lg font-semibold text-slate-800 dark:text-slate-100">Foto siap!</DialogTitle>
                                     <p class="text-sm text-slate-500 dark:text-slate-400">
                                         Unggah ke story atau feed, lalu tag {{ BRAND_HANDLE }}.
                                     </p>
@@ -44,22 +43,15 @@ const achievement = computed(() => props.result?.achievement)
                                 </button>
                             </div>
 
-                            <div v-if="achievement?.newBadge || achievement?.newRecord"
-                                class="flex items-center gap-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 px-3 py-2.5 mb-4">
-                                <BadgeEmblem v-if="achievement.badge" :badge="achievement.badge" :size="40" />
-                                <div class="text-sm leading-snug">
-                                    <p v-if="achievement.newBadge" class="font-semibold text-amber-800 dark:text-amber-300">
-                                        Lencana baru: {{ achievement.badge.name }}!
-                                    </p>
-                                    <p v-if="achievement.newRecord" class="text-amber-700 dark:text-amber-400/90">
-                                        Ini suhu terdingin yang pernah kamu abadikan.
-                                    </p>
-                                </div>
+                            <div v-if="achievement?.newRecord"
+                                class="rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 px-3 py-2.5 mb-4 text-sm leading-snug">
+                                <p class="font-semibold text-amber-800 dark:text-amber-300">Rekor baru!</p>
+                                <p class="text-amber-700 dark:text-amber-400/90">Ini suhu terdingin yang pernah kamu abadikan.</p>
                             </div>
 
                             <div class="rounded-2xl overflow-hidden flex justify-center bg-slate-100 dark:bg-black/30"
                                 :class="result?.transparent ? 'result-checker' : ''">
-                                <img v-if="result" :src="result.url" alt="Twibbon hasil" class="max-h-[46vh] w-auto object-contain" />
+                                <img v-if="result" :src="result.url" alt="Hasil foto suhu" class="max-h-[46vh] w-auto object-contain" />
                             </div>
                             <p v-if="isTouch || inAppBrowser" class="mt-2 text-xs text-center text-slate-500 dark:text-slate-400">
                                 Tombol simpan tidak bekerja? Tekan lama gambar di atas, lalu pilih simpan.

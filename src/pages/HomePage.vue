@@ -99,13 +99,13 @@ const periodTabs = [
 ]
 const activeTabIndex = computed(() => periodTabs.findIndex(t => t.key === activeMenu.value))
 
-onMounted(async () => {
-    await getMainData()
-    isLoading.value = false
-    await changeTime(1, 60, false)
-    await getPredictionData()
-    await getAqiData()
-    await getSunData()
+onMounted(() => {
+    // Fire every request at once — awaiting them in turn chained ~3s of latency.
+    getMainData().then(() => { isLoading.value = false })
+    changeTime(1, 60, false)
+    getPredictionData()
+    getAqiData()
+    getSunData()
 
     timers.push(setInterval(getMainData, 60000))
     timers.push(setInterval(getAqiData, 600000))

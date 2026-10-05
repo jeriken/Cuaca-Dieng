@@ -1,9 +1,9 @@
 // "Stiker" — transparent PNG overlay (like Strava's story sticker) to paste on
 // top of any photo or video in an Instagram story.
 
-import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../config.js'
 import {
-    AMBER, BODY, CAP, DISPLAY, clearShadow, drawBadgePill, drawBrand, drawIcon, drawText,
+    AMBER, BODY, CAP, DISPLAY, clearShadow, drawBrand, drawIcon, drawText,
     drawTrace, fitLine, setFont, setShadow, textWidth,
 } from '../draw.js'
 
@@ -72,14 +72,12 @@ export default {
         })
         clearShadow(ctx)
 
-        const badgeTop = statsTop + 110
-        if (data.badge) drawBadgePill(ctx, s, center, badgeTop, data.badge, { align: 'center' })
 
         setShadow(ctx, s, 14, SHADOW, 2)
         setFont(ctx, 28, 700, BODY)
         ctx.fillStyle = '#ffffff'
-        const footer = `${TREND_HASHTAG}  ·  ${BRAND_HANDLE}`
-        drawText(ctx, footer, center, badgeTop + 62 + 64, { align: 'center' })
+        const footer = `${SITE_URL}  ·  ${BRAND_HANDLE}`
+        drawText(ctx, footer, center, statsTop + 110 + 62 + 64, { align: 'center' })
         clearShadow(ctx)
     },
 }

@@ -1,4 +1,4 @@
-// Per-device conveniences: last used options and the badge collection.
+// Per-device conveniences: last used options and the coldest reading shared.
 // Storage can be unavailable (private mode, blocked site data), so every access is guarded.
 
 const PREFS_KEY = 'cuaca-twibbon-prefs'
@@ -26,20 +26,20 @@ export const savePrefs = (prefs) => write(PREFS_KEY, prefs)
 
 export function loadCollection() {
     const value = read(COLLECTION_KEY, {})
-    return { badges: value.badges || {}, coldest: value.coldest || null }
+    return { coldest: value.coldest || null }
 }
 
-// Called when a twibbon is shared or saved. Reports what is new so the UI can celebrate.
-export function recordTwibbon({ badgeId, temp, time, spotName }) {
+// Called when an image is shared or saved. Reports a new record so the UI can celebrate.
+export function recordTwibbon({ temp, time, spotName }) {
     const collection = loadCollection()
     const entry = { temp, time: new Date(time).toISOString(), spot: spotName }
-    const newBadge = Boolean(badgeId) && !collection.badges[badgeId]
     const colder = temp != null && (!collection.coldest || temp < collection.coldest.temp)
     // Only celebrate a record when it beats an earlier one.
     const newRecord = colder && Boolean(collection.coldest)
 
-    if (newBadge) collection.badges[badgeId] = entry
-    if (colder) collection.coldest = entry
-    if (newBadge || colder) write(COLLECTION_KEY, collection)
-    return { collection, newBadge, newRecord }
+    if (colder) {
+        collection.coldest = entry
+        write(COLLECTION_KEY, collection)
+    }
+    return { collection, newRecord }
 }

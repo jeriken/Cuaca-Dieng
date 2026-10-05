@@ -223,9 +223,9 @@ watch(() => props.data, (value) => {
                         </div>
                     </template>
 
-                    <!-- Twibbon CTA — below the weather info so the temperature stays the hero of screenshots.
+                    <!-- Foto Suhu CTA — below the weather info so the temperature stays the hero of screenshots.
                          Data-independent, so it renders during loading too and never shifts layout. -->
-                    <RouterLink to="/twibbon"
+                    <RouterLink to="/foto-suhu"
                         class="interactive group flex items-center gap-3 mx-3 md:mx-4 mt-3 rounded-2xl px-4 py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg shadow-sky-500/20 hover:shadow-sky-500/40">
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -236,10 +236,10 @@ watch(() => props.data, (value) => {
                         </span>
                         <span class="flex-1 min-w-0">
                             <span class="flex items-center gap-1.5 text-sm font-semibold leading-tight">
-                                Pamer Dinginnya Dieng
+                                Tambahkan Suhu ke Fotomu
                                 <span class="text-[9px] font-bold uppercase tracking-wide bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-md">Baru</span>
                             </span>
-                            <span class="block text-xs text-sky-100 truncate mt-0.5">Pasang suhu hari ini di fotomu</span>
+                            <span class="block text-xs text-sky-100 truncate mt-0.5">Bagikan suhu Dieng hari ini</span>
                         </span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                             stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform group-hover:translate-x-0.5">

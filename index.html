@@ -3,18 +3,21 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cuaca Dieng</title>
   <meta name="description" content="Informasi Embun Es Dieng">
   <link rel="icon" href="/pwa/favicon-32x32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="/pwa/favicon-16x16.png" type="image/png" sizes="16x16">
+  <link rel="icon" href="/pwa/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png">
   <link rel="manifest" href="/pwa/site.webmanifest">
   <meta name="theme-color" content="#fafaf9">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://api.thingspeak.com" crossorigin>
   <link rel="preconnect" href="https://api.openweathermap.org" crossorigin>
+  <!-- Latest sensor reading drives the hero (LCP); fetch it while the JS bundle downloads -->
+  <link rel="preload" href="https://api.thingspeak.com/channels/1082329/feed/last.json" as="fetch" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet" media="print" onload="this.media='all'">

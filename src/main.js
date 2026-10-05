@@ -5,6 +5,7 @@ import router from './router'
 import moment from 'moment'
 import 'moment/locale/id'
 import OneSignalVuePlugin from '@onesignal/onesignal-vue3'
+import { registerAppUpdate } from './composables/useAppUpdate.js'
 
 moment.locale('id')
 
@@ -24,3 +25,5 @@ app.use(OneSignalVuePlugin, {
 app.use(router)
 app.mount('#app')
 
+// Service worker: when a new deploy is ready, UpdateToast asks the user to reload
+router.isReady().then(registerAppUpdate)

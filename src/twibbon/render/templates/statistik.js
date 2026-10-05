@@ -1,9 +1,9 @@
 // "Statistik" — Strava-style activity card: big stat columns, a 24-hour
 // temperature trace as the "route", and the place + time as the title.
 
-import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../config.js'
 import {
-    BODY, CAP, DISPLAY, clearShadow, drawBadgePill, drawBrand, drawText, drawTrace,
+    BODY, CAP, DISPLAY, clearShadow, drawBrand, drawText, drawTrace,
     fitLine, setFont, setShadow, textWidth, verticalGradient,
 } from '../draw.js'
 
@@ -89,7 +89,6 @@ export default {
         setShadow(ctx, s, 16, 'rgba(0, 0, 0, 0.35)')
         drawBrand(ctx, s, left, safe.top)
         clearShadow(ctx)
-        if (data.badge) drawBadgePill(ctx, s, W - safe.x, safe.top - 2, data.badge, { size: 0.92, align: 'right' })
 
         if (chart) {
             setFont(ctx, 20, 700, BODY)
@@ -144,7 +143,7 @@ export default {
 
         setFont(ctx, 24, 700, BODY)
         ctx.fillStyle = '#ffffff'
-        drawText(ctx, TREND_HASHTAG, left, footerY)
+        drawText(ctx, SITE_URL, left, footerY)
         setFont(ctx, 24, 500, BODY)
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
         drawText(ctx, BRAND_HANDLE, W - safe.x, footerY, { align: 'right' })

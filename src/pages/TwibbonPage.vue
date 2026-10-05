@@ -4,10 +4,9 @@ import moment from 'moment/min/moment-with-locales'
 import { useDarkMode } from '../composables/useDarkMode.js'
 import TwibbonCanvas from '../components/twibbon/TwibbonCanvas.vue'
 import TemplatePicker from '../components/twibbon/TemplatePicker.vue'
-import BadgeShelf from '../components/twibbon/BadgeShelf.vue'
 import ResultSheet from '../components/twibbon/ResultSheet.vue'
-import { BRAND_HANDLE, FORMATS, SPOTS, STATION_NAME, TREND_HASHTAG } from '../twibbon/config.js'
-import { buildShareCaption, describeReading, describeSpot, spotCode, toWib } from '../twibbon/format.js'
+import { BRAND_HANDLE, FORMATS, SITE_URL, SPOTS, STATION_NAME, TREND_HASHTAG } from '../twibbon/config.js'
+import { buildShareCaption, describeReading, describeSpot, fmtTemp, spotCode, toWib } from '../twibbon/format.js'
 import { fetchLiveReading, fetchReadingAt } from '../twibbon/sensor.js'
 import { readCaptureTime } from '../twibbon/exif.js'
 import { DEFAULT_VIEW, MAX_ZOOM, clampView, loadPhoto, zoomView } from '../twibbon/photo.js'
@@ -17,8 +16,7 @@ moment.locale('id')
 
 const { isDark, toggle: toggleDark } = useDarkMode()
 
-const HOST = window.location.host.replace(/^www\./, '')
-const SHARE_LINK = `${HOST}/twibbon`
+const SHARE_LINK = `${SITE_URL}/foto-suhu`
 
 // Links opened from Instagram & co. land in in-app browsers where downloads often fail.
 const IN_APP_BROWSERS = [
@@ -289,7 +287,7 @@ const zoom = computed({
     },
 })
 
-const previewLabel = computed(() => `Pratinjau twibbon ${template.value.name}: ${spot.value.name}, ${data.value.tempText}°C, ${data.value.dateLong} pukul ${data.value.time} WIB`)
+const previewLabel = computed(() => `Pratinjau foto suhu ${template.value.name}: ${spot.value.name}, ${data.value.tempText}°C, ${data.value.dateLong} pukul ${data.value.time} WIB`)
 
 // ---------------------------------------------------------------------------
 // Export: share, download, copy
@@ -308,7 +306,7 @@ function track(name, params = {}) {
     }
 }
 
-const trackParams = (method) => ({ method, template: template.value.id, format: scene.value.format, data_mode: mode.value, badge: data.value.badge?.id })
+const trackParams = (method) => ({ method, template: template.value.id, format: scene.value.format, data_mode: mode.value })
 
 function dataUrlToBlob(dataUrl) {
     const [header, base64] = dataUrl.split(',')
@@ -326,7 +324,7 @@ function exportFile() {
     const type = transparent ? 'image/png' : 'image/jpeg'
     const blob = dataUrlToBlob(canvas.toDataURL(type, 0.92))
     const stamp = toWib(reading.value.time).format('YYYYMMDD-HHmm')
-    return new File([blob], `twibbon-dieng-${template.value.id}-${stamp}.${transparent ? 'png' : 'jpg'}`, { type })
+    return new File([blob], `foto-suhu-dieng-${template.value.id}-${stamp}.${transparent ? 'png' : 'jpg'}`, { type })
 }
 
 function triggerDownload(file) {
@@ -347,14 +345,12 @@ function showResult(file, extra = {}) {
 }
 
 function celebrate() {
-    const badge = data.value.badge
-    const outcome = recordTwibbon({ badgeId: badge?.id, temp: reading.value.temp, time: reading.value.time, spotName: spot.value.name })
+    const outcome = recordTwibbon({ temp: reading.value.temp, time: reading.value.time, spotName: spot.value.name })
     collection.value = outcome.collection
-    return { newBadge: outcome.newBadge, newRecord: outcome.newRecord, badge }
+    return { newRecord: outcome.newRecord }
 }
 
-function achievementText({ newBadge, newRecord, badge }) {
-    if (newBadge) return `Lencana baru: ${badge.name}!`
+function achievementText({ newRecord }) {
     if (newRecord) return 'Rekor suhu terdinginmu!'
     return null
 }
@@ -467,7 +463,7 @@ function onVisibilityChange() {
 }
 
 onMounted(async () => {
-    document.title = 'Twibbon Suhu Dieng · Cuaca Dieng'
+    document.title = 'Foto Suhu Dieng · Cuaca Dieng'
     loadLive()
     clock = setInterval(() => { now.value = Date.now() }, 30 * 1000)
     document.addEventListener('visibilitychange', onVisibilityChange)
@@ -501,7 +497,7 @@ onBeforeUnmount(() => {
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                 </router-link>
                 <div class="text-center leading-tight">
-                    <h1 class="font-semibold text-sm tracking-wider uppercase text-slate-700 dark:text-slate-200">Twibbon Suhu</h1>
+                    <h1 class="font-semibold text-sm tracking-wider uppercase text-slate-700 dark:text-slate-200">Foto Suhu</h1>
                     <p class="text-[11px] font-medium text-sky-500 dark:text-sky-400">{{ TREND_HASHTAG }}</p>
                 </div>
                 <button type="button" @click="toggleDark" :title="isDark ? 'Mode Terang' : 'Mode Gelap'" :aria-label="isDark ? 'Mode Terang' : 'Mode Gelap'"
@@ -530,7 +526,7 @@ onBeforeUnmount(() => {
 
         <!-- Controls -->
         <aside class="shrink-0 lg:w-[440px] xl:w-[480px] flex flex-col min-h-0 bg-white dark:bg-[#0f1b2d] border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-white/10 transition-colors duration-300">
-            <nav class="lg:hidden shrink-0 grid grid-cols-5 px-2 pt-1.5 border-b border-slate-100 dark:border-white/5" aria-label="Pengaturan twibbon">
+            <nav class="lg:hidden shrink-0 grid grid-cols-5 px-2 pt-1.5 border-b border-slate-100 dark:border-white/5" aria-label="Pengaturan foto">
                 <button v-for="tab in TABS" :key="tab.id" type="button" @click="activeTab = tab.id"
                     :aria-pressed="activeTab === tab.id"
                     class="flex flex-col items-center gap-1 py-1.5 text-[11px] font-semibold transition-colors border-b-2"
@@ -754,9 +750,11 @@ onBeforeUnmount(() => {
                         </button>
                     </div>
 
-                    <div class="mt-5">
-                        <BadgeShelf :collection="collection" :current="data.badge" />
-                    </div>
+                    <p v-if="collection.coldest" class="mt-5 text-xs text-slate-500 dark:text-slate-400">
+                        Rekor terdinginmu:
+                        <span class="font-display font-semibold text-slate-700 dark:text-slate-200">{{ fmtTemp(collection.coldest.temp) }}°C</span>
+                        · {{ collection.coldest.spot }}, {{ toWib(collection.coldest.time).format('D MMM YYYY') }}
+                    </p>
                 </section>
             </div>
 

@@ -1,8 +1,8 @@
 // "Poster" — the temperature as a huge headline over the photo.
 
-import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../config.js'
 import {
-    AMBER, BODY, CAP, DISPLAY, clearShadow, drawBadgePill, drawBrand, drawIcon, drawText,
+    AMBER, BODY, CAP, DISPLAY, clearShadow, drawBrand, drawIcon, drawText,
     fitLine, setFont, setShadow, textWidth, verticalGradient,
 } from '../draw.js'
 
@@ -55,11 +55,6 @@ export default {
         y -= bigSize * CAP + 34 * k
         const labelY = y
         y -= 28 * k * CAP
-        let badgeTop = null
-        if (data.badge) {
-            y -= 26 * k + 60 * k
-            badgeTop = y
-        }
         let captionY = null
         if (s.caption) {
             y -= 26 * k
@@ -89,7 +84,6 @@ export default {
             drawText(ctx, caption.text, left, captionY)
         }
         clearShadow(ctx)
-        if (badgeTop != null) drawBadgePill(ctx, s, left, badgeTop, data.badge, { size: k })
 
         setShadow(ctx, s, 14, 'rgba(0, 0, 0, 0.4)')
         setFont(ctx, 28 * k, 700, BODY)
@@ -123,7 +117,7 @@ export default {
         ctx.fillRect(left, statsY + 26 * k, width, 2)
         setFont(ctx, 24, 700, BODY)
         ctx.fillStyle = '#ffffff'
-        drawText(ctx, TREND_HASHTAG, left, footerY)
+        drawText(ctx, SITE_URL, left, footerY)
         setFont(ctx, 24, 500, BODY)
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
         drawText(ctx, BRAND_HANDLE, W - safe.x, footerY, { align: 'right' })

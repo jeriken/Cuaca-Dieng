@@ -29,10 +29,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Twibbon Suhu",
-      "short_name": "Twibbon",
-      "description": "Bikin twibbon dengan suhu Dieng",
-      "url": "/twibbon",
+      "name": "Foto Suhu",
+      "short_name": "Foto Suhu",
+      "description": "Pasang suhu Dieng di fotomu",
+      "url": "/foto-suhu",
       "icons": [
         {
           "src": "/pwa/pwa-192x192.png",

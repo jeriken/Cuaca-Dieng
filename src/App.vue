@@ -1,5 +1,6 @@
 <script setup>
 import { useDarkMode } from './composables/useDarkMode'
+import UpdateToast from './components/UpdateToast.vue'
 
 const { isDark } = useDarkMode()
 </script>
@@ -7,5 +8,6 @@ const { isDark } = useDarkMode()
 <template>
   <div id="app">
     <router-view />
+    <UpdateToast />
   </div>
 </template>

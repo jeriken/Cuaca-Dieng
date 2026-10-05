@@ -46,7 +46,7 @@ export function loadAssets() {
             : Promise.resolve()
         // Don't hold the preview hostage to a slow font CDN; we re-render when fonts land.
         const fontsOrTimeout = Promise.race([fonts, new Promise(resolve => setTimeout(resolve, 4000))])
-        const logo = loadImage('/img/summertime.png').then(img => { assets.logo = img }).catch(() => null)
+        const logo = loadImage('/pwa/pwa-192x192.png').then(img => { assets.logo = img }).catch(() => null)
         assetsPromise = Promise.all([fontsOrTimeout, logo])
     }
     return assetsPromise

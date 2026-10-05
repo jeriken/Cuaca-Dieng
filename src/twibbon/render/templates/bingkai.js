@@ -1,9 +1,9 @@
 // "Bingkai" — the classic twibbon: a branded frame around the photo with a
 // temperature seal stamped on the corner of the photo window.
 
-import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../config.js'
 import {
-    AMBER, BODY, CAP, DISPLAY, NAVY, clearShadow, drawArcText, drawBadgePill, drawBrand,
+    AMBER, BODY, CAP, DISPLAY, NAVY, clearShadow, drawArcText, drawBrand,
     drawContours, drawIcon, drawText, fitLine, roundRectPath, setFont, setShadow, textWidth, verticalGradient,
 } from '../draw.js'
 
@@ -64,7 +64,7 @@ function drawSeal(ctx, s, cx, cy, r) {
 export default {
     id: 'bingkai',
     name: 'Bingkai',
-    hint: 'Twibbon klasik',
+    hint: 'Gaya klasik',
     draw(ctx, s) {
         const { W, H, data, spot } = s
         const g = GEOMETRY[s.format]
@@ -127,26 +127,22 @@ export default {
             drawText(ctx, caption.text, left, y)
         }
 
-        // Hashtag + handle, with the badge on the right.
+        // Site URL + handle.
         const pillHeight = 60 * k
         const bottomMargin = s.format === 'story' ? 230 : 44 * k
         const pillY = H - bottomMargin - pillHeight
         setFont(ctx, 25 * k, 700, BODY)
-        const tagWidth = textWidth(ctx, TREND_HASHTAG) + 44 * k
+        const tagWidth = textWidth(ctx, SITE_URL) + 44 * k
         ctx.beginPath()
         roundRectPath(ctx, left, pillY, tagWidth, pillHeight, pillHeight / 2)
         ctx.fillStyle = AMBER
         ctx.fill()
         ctx.fillStyle = NAVY
-        drawText(ctx, TREND_HASHTAG, left + 22 * k, pillY + pillHeight / 2 + 25 * k * CAP / 2)
+        drawText(ctx, SITE_URL, left + 22 * k, pillY + pillHeight / 2 + 25 * k * CAP / 2)
 
-        let badgeWidth = 0
-        if (data.badge) {
-            badgeWidth = drawBadgePill(ctx, s, W - left, pillY + (pillHeight - 62 * k) / 2, data.badge, { size: k, align: 'right' }).width
-        }
         const handleX = left + tagWidth + 18 * k
         setFont(ctx, 24 * k, 600, BODY)
-        if (handleX + textWidth(ctx, BRAND_HANDLE) < W - left - badgeWidth - 16 * k) {
+        if (handleX + textWidth(ctx, BRAND_HANDLE) < W - left) {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
             drawText(ctx, BRAND_HANDLE, handleX, pillY + pillHeight / 2 + 24 * k * CAP / 2)
         }

@@ -176,7 +176,7 @@ export function drawIcon(ctx, name, x, y, size, color, weight = 2) {
 // ---------------------------------------------------------------------------
 // Brand
 
-const LOGO_RATIO = 512 / 400 // /img/summertime.png
+const LOGO_RATIO = 1 // /pwa/pwa-192x192.png (the favicon artwork)
 
 export function drawLogo(ctx, scene, x, y, height) {
     const width = height * LOGO_RATIO
@@ -207,71 +207,6 @@ export function drawBrand(ctx, scene, x, y, { size = 1, align = 'left', color = 
     ctx.fillStyle = color
     drawText(ctx, BRAND_NAME, left + logoWidth + gap, y + logoHeight / 2 + 29 * size * CAP / 2, { spacing })
     return { width: total, height: logoHeight }
-}
-
-// ---------------------------------------------------------------------------
-// Badges
-
-function hexagonPath(ctx, cx, cy, r) {
-    const points = Array.from({ length: 6 }, (_, i) => {
-        const a = (Math.PI / 3) * i - Math.PI / 2
-        return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]
-    })
-    const corner = r * 0.2
-    ctx.moveTo((points[5][0] + points[0][0]) / 2, (points[5][1] + points[0][1]) / 2)
-    for (let i = 0; i < 6; i++) {
-        const p = points[i]
-        const next = points[(i + 1) % 6]
-        ctx.arcTo(p[0], p[1], (p[0] + next[0]) / 2, (p[1] + next[1]) / 2, corner)
-    }
-    ctx.closePath()
-}
-
-export function drawEmblem(ctx, scene, cx, cy, r, badge) {
-    ctx.save()
-    ctx.beginPath()
-    hexagonPath(ctx, cx, cy, r)
-    ctx.fillStyle = verticalGradient(ctx, cy - r, cy + r, [[0, badge.color], [1, badge.color2]])
-    setShadow(ctx, scene, 14, 'rgba(0, 0, 0, 0.3)', 3)
-    ctx.fill()
-    clearShadow(ctx)
-    ctx.lineWidth = Math.max(1, r * 0.08)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'
-    ctx.stroke()
-
-    // Soft highlight on the upper half for a minted-medal look.
-    ctx.clip()
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.16)'
-    ctx.fillRect(cx - r, cy - r, r * 2, r * 0.9)
-    ctx.restore()
-
-    const iconSize = r * 1.05
-    drawIcon(ctx, badge.icon, cx - iconSize / 2, cy - iconSize / 2, iconSize, '#ffffff', 2.4)
-}
-
-// Emblem + uppercase badge name in a pill. (x, y) is the pill's top edge at `align`.
-export function drawBadgePill(ctx, scene, x, y, badge, { size = 1, align = 'left', theme = 'dark' } = {}) {
-    const height = 62 * size
-    const spacing = 2 * size
-    setFont(ctx, 21 * size, 700, BODY)
-    const label = badge.name.toUpperCase()
-    const labelWidth = textWidth(ctx, label, spacing)
-    const width = height + 4 * size + labelWidth + 26 * size
-    const left = align === 'center' ? x - width / 2 : align === 'right' ? x - width : x
-
-    ctx.beginPath()
-    roundRectPath(ctx, left, y, width, height, height / 2)
-    ctx.fillStyle = theme === 'dark' ? 'rgba(6, 12, 26, 0.55)' : '#ffffff'
-    ctx.fill()
-    ctx.lineWidth = 1.5
-    ctx.strokeStyle = theme === 'dark' ? 'rgba(255, 255, 255, 0.22)' : 'rgba(11, 23, 48, 0.12)'
-    ctx.stroke()
-
-    drawEmblem(ctx, scene, left + height / 2 + 2 * size, y + height / 2, height * 0.4, badge)
-    ctx.fillStyle = theme === 'dark' ? '#ffffff' : NAVY
-    setFont(ctx, 21 * size, 700, BODY)
-    drawText(ctx, label, left + height + 4 * size, y + height / 2 + 21 * size * CAP / 2, { spacing })
-    return { width, height }
 }
 
 // ---------------------------------------------------------------------------

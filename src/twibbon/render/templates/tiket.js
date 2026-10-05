@@ -1,8 +1,8 @@
 // "Tiket" — a boarding pass to Dieng, "Negeri di Atas Awan".
 
-import { BRAND_HANDLE, TREND_HASHTAG } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../config.js'
 import {
-    AMBER, BODY, CAP, DISPLAY, NAVY, clearShadow, drawBarcode, drawBrand, drawEmblem, drawText,
+    AMBER, BODY, CAP, DISPLAY, NAVY, clearShadow, drawBarcode, drawBrand, drawText,
     fitLine, setFont, setShadow, textWidth, verticalGradient,
 } from '../draw.js'
 
@@ -115,7 +115,7 @@ export default {
                 [
                     { label: 'TANGGAL', value: data.dateNum },
                     { label: 'WAKTU', value: `${data.time} WIB` },
-                    { label: 'KONDISI', value: data.kondisi ?? '--' },
+                    { label: 'TEKANAN', value: data.pressureText },
                 ],
             ]
             : [[
@@ -141,29 +141,25 @@ export default {
         ctx.stroke()
         ctx.setLineDash([])
 
-        // Stub content: passenger + class (the badge) on the left, barcode on the right.
+        // Stub content: passenger + condition on the left, barcode on the right.
         top = notchY + perfH / 2
         const barcodeWidth = 250 * k
         const textWidthMax = w - pad * 3 - barcodeWidth
         drawField(ctx, x + pad, top + 26 * k, textWidthMax, k, { label: 'PENUMPANG', value: s.caption || 'Pengunjung Dieng', size: 32 })
 
-        const classTop = top + 104 * k
+        const conditionTop = top + 104 * k
         setFont(ctx, 17 * k, 700, BODY)
         ctx.fillStyle = SLATE
-        drawText(ctx, 'KELAS', x + pad, classTop + 17 * k * CAP, { spacing: 2 * k })
-        if (data.badge) {
-            const emblem = 20 * k
-            drawEmblem(ctx, s, x + pad + 96 * k + emblem, classTop + 17 * k * CAP / 2, emblem, data.badge)
-            const label = fitLine(ctx, data.badge.name.toUpperCase(), textWidthMax - 96 * k - emblem * 2 - 12 * k, { size: 24 * k, min: 16 * k, weight: 700, family: DISPLAY, spacing: 1.5 * k })
-            ctx.fillStyle = NAVY
-            drawText(ctx, label.text, x + pad + 96 * k + emblem * 2 + 12 * k, classTop + 17 * k * CAP / 2 + label.size * CAP / 2, { spacing: 1.5 * k })
-        }
+        drawText(ctx, 'KONDISI', x + pad, conditionTop + 17 * k * CAP, { spacing: 2 * k })
+        const condition = fitLine(ctx, (data.kondisi ?? '--').toUpperCase(), textWidthMax - 120 * k, { size: 24 * k, min: 16 * k, weight: 700, family: DISPLAY, spacing: 1.5 * k })
+        ctx.fillStyle = NAVY
+        drawText(ctx, condition.text, x + pad + 120 * k, conditionTop + 17 * k * CAP / 2 + condition.size * CAP / 2, { spacing: 1.5 * k })
 
         const barcodeX = x + w - pad - barcodeWidth
         drawBarcode(ctx, barcodeX, top + 28 * k, barcodeWidth, 78 * k, `${spot.name}|${data.dateNum}|${data.time}|${data.tempText}`, NAVY)
         setFont(ctx, 19 * k, 700, BODY)
         ctx.fillStyle = NAVY
-        const tag = fitLine(ctx, TREND_HASHTAG, barcodeWidth, { size: 19 * k, min: 14 * k, weight: 700 })
+        const tag = fitLine(ctx, SITE_URL, barcodeWidth, { size: 19 * k, min: 14 * k, weight: 700 })
         drawText(ctx, tag.text, barcodeX + barcodeWidth / 2, top + 28 * k + 78 * k + 34 * k, { align: 'center' })
         ctx.restore()
 

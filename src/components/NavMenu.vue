@@ -14,7 +14,7 @@ const { canInstall, install } = useInstallPrompt()
 // The app's own pages and features
 const appLinks = computed(() => [
     { key: 'home', label: 'Beranda', to: '/', icon: ICONS.home, onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
-    { key: 'twibbon', label: 'Twibbon Suhu', to: '/twibbon', icon: ICONS.camera, isNew: true },
+    { key: 'twibbon', label: 'Foto Suhu', to: '/foto-suhu', icon: ICONS.camera, isNew: true },
     { key: 'tips', label: 'Tips Embun Es', icon: ICONS.bulb, onClick: () => emit('tips') },
     // Only offered when the browser has handed us an install prompt
     canInstall.value && { key: 'install', label: 'Install Aplikasi', icon: ICONS.install, onClick: install },

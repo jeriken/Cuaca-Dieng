@@ -9,9 +9,14 @@ export default createRouter({
       component: HomePage,
     },
     {
-      path: '/twibbon',
+      path: '/foto-suhu',
       // Loaded on demand so the home page bundle stays the same size.
       component: () => import('./pages/TwibbonPage.vue'),
+    },
+    {
+      // Old link, kept so previously shared captions still work.
+      path: '/twibbon',
+      redirect: '/foto-suhu',
     }
   ]
 })

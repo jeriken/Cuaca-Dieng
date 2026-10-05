@@ -1,5 +1,5 @@
 import moment from 'moment/min/moment-with-locales'
-import { getBadge, BRAND_HANDLE, BRAND_HASHTAG, TREND_HASHTAG } from './config.js'
+import { BRAND_HANDLE, BRAND_HASHTAG, TREND_HASHTAG } from './config.js'
 moment.locale('id')
 
 // Dieng is on WIB (UTC+7, no DST). Format in WIB even if the phone uses another zone.
@@ -47,7 +47,6 @@ const EMPTY_DATA = {
     minText: null,
     minTime: null,
     trace: [],
-    badge: null,
 }
 
 // Turn a sensor reading into display-ready strings for the templates.
@@ -80,7 +79,6 @@ export function describeReading(reading, now = new Date()) {
         trace: reading.trace ?? [],
         traceStart: reading.traceStart,
         traceEnd: reading.time.getTime(),
-        badge: getBadge(reading.temp),
     }
 }
 
@@ -100,12 +98,11 @@ export function spotCode(name) {
 }
 
 export function buildShareCaption({ data, spot, link }) {
-    const badge = data.badge
     return [
-        `${spot.name} ${data.tempText}°C ${badge?.emoji ?? ''}`.trim(),
-        `${data.dateShort} · ${data.time} WIB${badge ? ` · Lencana ${badge.name}` : ''}`,
+        `${spot.name} ${data.tempText}°C`,
+        `${data.dateShort} · ${data.time} WIB`,
         '',
-        `Bikin twibbon suhumu di ${link}`,
+        `Pasang suhu Dieng di fotomu: ${link}`,
         `${TREND_HASHTAG} ${BRAND_HASHTAG} ${BRAND_HANDLE}`,
     ].join('\n')
 }
