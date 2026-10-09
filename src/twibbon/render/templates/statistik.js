@@ -38,6 +38,7 @@ function drawStat(ctx, s, x, labelY, valueY, maxWidth, { label, value, unit, siz
 
 export default {
     id: 'statistik',
+    kind: 'foto',
     name: 'Statistik',
     hint: 'Gaya Strava',
     draw(ctx, s) {

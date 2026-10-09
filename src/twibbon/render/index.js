@@ -2,12 +2,38 @@ import statistik from './templates/statistik.js'
 import bingkai from './templates/bingkai.js'
 import poster from './templates/poster.js'
 import tiket from './templates/tiket.js'
-import stiker from './templates/stiker.js'
+import polaroid from './templates/polaroid.js'
+import stikerStatistik from './templates/stiker/statistik.js'
+import stikerTiket from './templates/stiker/tiket.js'
+import stikerSegel from './templates/stiker/segel.js'
+import stikerAngka from './templates/stiker/angka.js'
+import stikerLabel from './templates/stiker/label.js'
+import stikerTermometer from './templates/stiker/termometer.js'
 import { drawLandscape, drawPhoto } from './background.js'
 
-export const TEMPLATES = [statistik, bingkai, poster, tiket, stiker]
+// Two kinds of design: transparent stickers to paste on any story (the default,
+// most people use these), and designs drawn over the person's photo.
+export const KINDS = [
+    { id: 'stiker', label: 'Stiker', hint: 'PNG transparan' },
+    { id: 'foto', label: 'Dengan foto', hint: 'Desain di atas fotomu' },
+]
 
-export const getTemplate = (id) => TEMPLATES.find(t => t.id === id) ?? TEMPLATES[0]
+export const TEMPLATES = [
+    stikerStatistik, stikerAngka, stikerLabel, stikerTiket, stikerSegel, stikerTermometer,
+    statistik, bingkai, poster, tiket, polaroid,
+]
+
+export const templatesOf = (kind) => TEMPLATES.filter(t => t.kind === kind)
+
+// Falls back to the first design of `kind`, so stale saved ids still work.
+export function getTemplate(id, kind = 'stiker') {
+    return TEMPLATES.find(t => t.id === id && t.kind === kind) ?? templatesOf(kind)[0]
+}
+
+// The matching design in the other kind (Bingkai ↔ Segel sticker), if there is one.
+export function counterpart(template, kind) {
+    return templatesOf(kind).find(t => t.pair === template.id || t.id === template.pair) ?? null
+}
 
 // Canvas size for a template in a format (the sticker has its own fixed size).
 export function canvasSize(template, format) {

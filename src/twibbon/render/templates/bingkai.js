@@ -27,7 +27,7 @@ function contourLayer(W, H) {
     return contourCache.get(key)
 }
 
-function drawSeal(ctx, s, cx, cy, r) {
+export function drawSeal(ctx, s, cx, cy, r) {
     const { data } = s
     ctx.save()
     ctx.beginPath()
@@ -63,6 +63,7 @@ function drawSeal(ctx, s, cx, cy, r) {
 
 export default {
     id: 'bingkai',
+    kind: 'foto',
     name: 'Bingkai',
     hint: 'Gaya klasik',
     draw(ctx, s) {

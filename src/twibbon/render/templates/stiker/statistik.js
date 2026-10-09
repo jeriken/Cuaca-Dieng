@@ -1,20 +1,19 @@
-// "Stiker" — transparent PNG overlay (like Strava's story sticker) to paste on
-// top of any photo or video in an Instagram story.
+// Statistik sticker — Strava-style story sticker to paste on top of any photo
+// or video in an Instagram story.
 
-import { BRAND_HANDLE, SITE_URL } from '../../config.js'
+import { BRAND_HANDLE, SITE_URL } from '../../../config.js'
 import {
     AMBER, BODY, CAP, DISPLAY, clearShadow, drawBrand, drawIcon, drawText,
     drawTrace, fitLine, setFont, setShadow, textWidth,
-} from '../draw.js'
-
-const SHADOW = 'rgba(0, 0, 0, 0.55)'
+} from '../../draw.js'
+import { SHADOW, STICKER } from './common.js'
 
 export default {
-    id: 'stiker',
-    name: 'Stiker',
-    hint: 'PNG transparan',
-    usesPhoto: false,
-    transparent: true,
+    ...STICKER,
+    id: 'stiker-statistik',
+    pair: 'statistik', // the photo design it comes from
+    name: 'Statistik',
+    hint: 'Gaya Strava',
     size: { width: 1080, height: 1000 },
     safe: { top: 56, bottom: 56, x: 72 },
     draw(ctx, s) {
@@ -71,7 +70,6 @@ export default {
             drawText(ctx, value.text, cx, statsTop + 20 * CAP + 16 + value.size * CAP, { align: 'center' })
         })
         clearShadow(ctx)
-
 
         setShadow(ctx, s, 14, SHADOW, 2)
         setFont(ctx, 28, 700, BODY)

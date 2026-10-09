@@ -9,7 +9,7 @@ import {
 const SIZES = { story: 400, feed: 320, square: 260 }
 
 // "−3" in full size, ",4°" as a superscript aligned to the cap height.
-function drawBigTemperature(ctx, x, baseline, maxWidth, size, parts) {
+export function drawBigTemperature(ctx, x, baseline, maxWidth, size, parts) {
     const main = parts.sign + parts.int
     const small = parts.dec ? `${parts.dec}°` : '°'
     const measure = (s) => {
@@ -34,6 +34,7 @@ function drawBigTemperature(ctx, x, baseline, maxWidth, size, parts) {
 
 export default {
     id: 'poster',
+    kind: 'foto',
     name: 'Poster',
     hint: 'Angka raksasa',
     draw(ctx, s) {

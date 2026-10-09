@@ -14,6 +14,7 @@ const props = defineProps({
 defineEmits(['update:modelValue'])
 
 const THUMB_HEIGHT = 132
+const THUMB_MAX_WIDTH = 170 // wide stickers (Label) shrink to fit
 const canvases = ref({})
 let timer = null
 
@@ -24,11 +25,11 @@ function renderThumbnails() {
         const el = canvases.value[template.id]
         if (!el) continue
         const { width, height } = canvasSize(template, props.format)
-        const scale = (THUMB_HEIGHT * pixelRatio) / height
+        const scale = Math.min(THUMB_HEIGHT / height, THUMB_MAX_WIDTH / width) * pixelRatio
         el.width = Math.round(width * scale)
         el.height = Math.round(height * scale)
         el.style.width = `${el.width / pixelRatio}px`
-        el.style.height = `${THUMB_HEIGHT}px`
+        el.style.height = `${el.height / pixelRatio}px`
         const ctx = el.getContext('2d')
         ctx.setTransform(scale, 0, 0, scale, 0, 0)
         renderScene(ctx, {

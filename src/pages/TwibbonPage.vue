@@ -10,7 +10,7 @@ import { buildShareCaption, describeReading, describeSpot, fmtTemp, spotCode, to
 import { fetchLiveReading, fetchReadingAt } from '../twibbon/sensor.js'
 import { readCaptureTime } from '../twibbon/exif.js'
 import { DEFAULT_VIEW, MAX_ZOOM, clampView, loadPhoto, zoomView } from '../twibbon/photo.js'
-import { TEMPLATES, assets, canvasSize, getTemplate, loadAssets } from '../twibbon/render/index.js'
+import { KINDS, assets, canvasSize, counterpart, getTemplate, loadAssets, templatesOf } from '../twibbon/render/index.js'
 import { loadCollection, loadPrefs, recordTwibbon, savePrefs } from '../twibbon/storage.js'
 moment.locale('id')
 
@@ -39,30 +39,53 @@ const CAN_SHARE_FILES = (() => {
 const CAN_COPY_IMAGE = typeof window.ClipboardItem === 'function' && typeof navigator.clipboard?.write === 'function'
 
 const TABS = [
-    { id: 'foto', label: 'Foto', icon: ['M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z', 'M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'] },
     { id: 'desain', label: 'Desain', icon: ['M3 3h7v9H3z', 'M14 3h7v5h-7z', 'M14 12h7v9h-7z', 'M3 16h7v5H3z'] },
+    { id: 'foto', label: 'Foto', icon: ['M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z', 'M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'] },
     { id: 'suhu', label: 'Suhu', icon: ['M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z'] },
     { id: 'lokasi', label: 'Lokasi', icon: ['M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z', 'M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'] },
     { id: 'tren', label: 'Tren', icon: ['M23 6l-9.5 9.5-5-5L1 18', 'M17 6h6v6'] },
 ]
-const activeTab = ref('foto')
+const activeTab = ref('desain')
 const panelClass = (id) => (activeTab.value === id ? 'block' : 'hidden lg:block')
 
 // ---------------------------------------------------------------------------
 // Options (remembered per device)
 
 const prefs = loadPrefs()
-const templateId = ref(getTemplate(prefs.template).id)
+// Stickers are what most people use, so they're the default.
+const kind = ref(prefs.kind === 'foto' ? 'foto' : 'stiker')
+const designIds = ref({
+    stiker: getTemplate(prefs.stiker, 'stiker').id,
+    foto: getTemplate(prefs.foto ?? prefs.template, 'foto').id,
+})
+const templateId = computed({
+    get: () => designIds.value[kind.value],
+    set: (id) => { designIds.value = { ...designIds.value, [kind.value]: id } },
+})
 const formatId = ref(FORMATS.some(f => f.id === prefs.format) ? prefs.format : 'story')
 const spotId = ref(prefs.spot === 'custom' || SPOTS.some(s => s.id === prefs.spot) ? prefs.spot : 'dieng')
 const customSpot = ref(typeof prefs.customSpot === 'string' ? prefs.customSpot : '')
 const caption = ref('')
 
-watch([templateId, formatId, spotId, customSpot], () => {
-    savePrefs({ template: templateId.value, format: formatId.value, spot: spotId.value, customSpot: customSpot.value })
+watch([kind, designIds, formatId, spotId, customSpot], () => {
+    savePrefs({ kind: kind.value, ...designIds.value, format: formatId.value, spot: spotId.value, customSpot: customSpot.value })
 })
 
-const template = computed(() => getTemplate(templateId.value))
+const template = computed(() => getTemplate(templateId.value, kind.value))
+const kindTemplates = computed(() => templatesOf(kind.value))
+
+// Switching kind keeps the same look where both exist (Tiket photo ↔ Tiket sticker).
+function setKind(next) {
+    if (kind.value === next) return
+    const match = counterpart(template.value, next)
+    kind.value = next
+    if (match) templateId.value = match.id
+}
+
+function usePhotoDesign() {
+    setKind('foto')
+    pickPhoto()
+}
 const format = computed(() => FORMATS.find(f => f.id === formatId.value) ?? FORMATS[0])
 const size = computed(() => canvasSize(template.value, format.value))
 
@@ -74,9 +97,9 @@ const spot = computed(() => {
     return describeSpot(SPOTS.find(s => s.id === spotId.value) ?? SPOTS[0])
 })
 
-const captionPlaceholder = computed(() => (template.value.id === 'tiket'
-    ? 'Nama penumpang, mis. @namakamu'
-    : 'Judul, mis. Sunrise pertama di Sikunir'))
+const captionField = computed(() => (template.value.caption === false
+    ? null
+    : template.value.caption ?? { label: 'Judul', placeholder: 'Judul, mis. Sunrise pertama di Sikunir' }))
 
 // ---------------------------------------------------------------------------
 // Sensor data: live, or the reading at a moment the person picks.
@@ -217,7 +240,7 @@ async function usePhotoFile(file) {
         photo.value = loaded
         view.value = { ...DEFAULT_VIEW }
         photoTime.value = takenAt
-        if (template.value.usesPhoto === false) templateId.value = 'statistik'
+        setKind('foto')
         track('twibbon_photo', { exif_time: Boolean(takenAt) })
     } catch {
         toast('Foto tidak bisa dibuka. Coba foto JPG atau PNG.', 'error')
@@ -549,9 +572,15 @@ onBeforeUnmount(() => {
                     <h2 id="sec-foto" class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">Foto</h2>
                     <input ref="fileInput" type="file" accept="image/*" class="sr-only" tabindex="-1" @change="onFileChange">
 
-                    <p v-if="template.usesPhoto === false" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Desain <b>Stiker</b> tidak memakai foto. Salin atau unduh stikernya, lalu tempel di atas foto atau video di Instagram Story-mu.
-                    </p>
+                    <div v-if="template.usesPhoto === false" class="space-y-3">
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            Stiker tidak memakai foto. Salin atau unduh stikernya, lalu tempel di atas foto atau video di Instagram Story-mu.
+                        </p>
+                        <button type="button" @click="usePhotoDesign"
+                            class="w-full rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-sm font-semibold py-2.5 transition-colors">
+                            Pakai desain dengan foto
+                        </button>
+                    </div>
                     <template v-else>
                         <button v-if="!photo" type="button" @click="pickPhoto"
                             class="w-full flex items-center gap-4 rounded-2xl border-2 border-dashed border-sky-200 dark:border-sky-500/30 bg-sky-50/60 dark:bg-sky-500/5 hover:bg-sky-50 dark:hover:bg-sky-500/10 px-4 py-4 text-left transition-colors">
@@ -608,7 +637,15 @@ onBeforeUnmount(() => {
                 <!-- Desain -->
                 <section :class="panelClass('desain')" aria-labelledby="sec-desain">
                     <h2 id="sec-desain" class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">Desain</h2>
-                    <TemplatePicker v-model="templateId" :templates="TEMPLATES" :scene="scene" :format="format" :paused="dragging" />
+                    <div class="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 dark:bg-white/5 p-1 mb-3" role="radiogroup" aria-label="Jenis desain">
+                        <button v-for="k in KINDS" :key="k.id" type="button" role="radio" :aria-checked="kind === k.id" @click="setKind(k.id)"
+                            class="rounded-lg py-1.5 transition-colors leading-tight"
+                            :class="kind === k.id ? 'bg-white dark:bg-white/15 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'">
+                            <span class="block text-sm font-semibold">{{ k.label }}</span>
+                            <span class="block text-[10px] font-medium opacity-70">{{ k.hint }}</span>
+                        </button>
+                    </div>
+                    <TemplatePicker v-model="templateId" :templates="kindTemplates" :scene="scene" :format="format" :paused="dragging" />
                     <div class="mt-3">
                         <div v-if="!template.size" class="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 dark:bg-white/5 p-1" role="radiogroup" aria-label="Ukuran">
                             <button v-for="f in FORMATS" :key="f.id" type="button" role="radio" :aria-checked="formatId === f.id"
@@ -618,7 +655,7 @@ onBeforeUnmount(() => {
                                 {{ f.label }} <span class="text-xs font-medium opacity-60">{{ f.ratio }}</span>
                             </button>
                         </div>
-                        <p v-else class="text-xs text-slate-400 dark:text-slate-500">PNG transparan 1080 × 1000 px — pas ditempel di story.</p>
+                        <p v-else class="text-xs text-slate-400 dark:text-slate-500">PNG transparan {{ size.width }} × {{ size.height }} px. Tempel di atas foto atau video story-mu.</p>
                     </div>
                 </section>
 
@@ -718,11 +755,13 @@ onBeforeUnmount(() => {
                         {{ spot.elevationText ? `Ketinggian ${spot.elevationText}.` : 'Ketinggian tidak ditampilkan untuk lokasi lain.' }}
                     </p>
 
-                    <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mt-5 mb-2">
-                        {{ template.id === 'tiket' ? 'Nama penumpang' : 'Judul' }} <span class="normal-case font-normal tracking-normal">(opsional)</span>
-                    </h2>
-                    <input v-model="caption" type="text" maxlength="40" :placeholder="captionPlaceholder" aria-label="Judul atau nama"
-                        class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <template v-if="captionField">
+                        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mt-5 mb-2">
+                            {{ captionField.label }} <span class="normal-case font-normal tracking-normal">(opsional)</span>
+                        </h2>
+                        <input v-model="caption" type="text" maxlength="40" :placeholder="captionField.placeholder" aria-label="Judul atau nama"
+                            class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    </template>
                 </section>
 
                 <!-- Tren -->
